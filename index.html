@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>EventSplitter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              slate: {
+                950: '#020617',
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      /* Mobile-like touch behavior */
+      body {
+        -webkit-tap-highlight-color: transparent;
+        overscroll-behavior-y: none;
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://aistudiocdn.com/react@^19.2.1/",
+    "react": "https://aistudiocdn.com/react@^19.2.1",
+    "react-router-dom": "https://aistudiocdn.com/react-router-dom@^7.10.1",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.556.0"
+  }
+}
+</script>
+</head>
+  <body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 h-screen overflow-hidden flex flex-col transition-colors duration-200">
+    <div id="root" class="flex-1 flex flex-col h-full w-full max-w-md mx-auto bg-white dark:bg-slate-900 shadow-2xl overflow-hidden relative transition-colors duration-200"></div>
+    <script>
+        // Prevent FOUC (Flash of Unstyled Content) by reading localStorage immediately
+        try {
+            const stored = localStorage.getItem('trip_splitter_data_v2');
+            if (stored) {
+                const data = JSON.parse(stored);
+                const theme = data.settings?.theme || 'system';
+                
+                if (theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                    document.documentElement.classList.add('dark');
+                }
+            }
+        } catch (e) {}
+    </script>
+  </body>
+</html>

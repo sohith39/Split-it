@@ -1,0 +1,5 @@
+{
+  "name": "EventSplitter",
+  "description": "A mobile-first expense tracker for group events. Manage ongoing events, track shared expenses, and archive history.",
+  "requestFramePermissions": []
+}

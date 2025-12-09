@@ -10,6 +10,8 @@ interface TripContextType {
   login: (username: string, phoneNumber?: string, avatarColor?: string) => void;
   logout: () => void;
   addTrip: (name: string, members: string[]) => void;
+  addMemberToTrip: (tripId: string, member: string) => void;
+  removeMemberFromTrip: (tripId: string, member: string) => void;
   addExpense: (tripId: string, expense: Omit<Expense, 'id' | 'timestamp'>) => void;
   updateExpense: (tripId: string, expense: Expense) => void;
   deleteExpense: (tripId: string, expenseId: string) => void;
@@ -126,6 +128,27 @@ export const TripProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setData(prev => ({ ...prev, trips: [newTrip, ...prev.trips] }));
   };
 
+  const addMemberToTrip = (tripId: string, member: string) => {
+    setData(prev => ({
+      ...prev,
+      trips: prev.trips.map(trip => {
+        if (trip.id !== tripId) return trip;
+        if (trip.members.includes(member)) return trip;
+        return { ...trip, members: [...trip.members, member] };
+      })
+    }));
+  };
+
+  const removeMemberFromTrip = (tripId: string, member: string) => {
+    setData(prev => ({
+      ...prev,
+      trips: prev.trips.map(trip => {
+        if (trip.id !== tripId) return trip;
+        return { ...trip, members: trip.members.filter(m => m !== member) };
+      })
+    }));
+  };
+
   const addExpense = (tripId: string, expenseData: Omit<Expense, 'id' | 'timestamp'>) => {
     setData(prev => ({
       ...prev,
@@ -210,7 +233,9 @@ export const TripProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       isAuthenticated: data.isAuthenticated,
       login,
       logout,
-      addTrip, 
+      addTrip,
+      addMemberToTrip,
+      removeMemberFromTrip, 
       addExpense,
       updateExpense,
       deleteExpense,

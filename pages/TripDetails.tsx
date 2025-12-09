@@ -1,16 +1,16 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTrips } from '../context/TripContext';
 import { ExpenseCategory, Expense } from '../types';
 import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
 import { SwipeableRow } from '../components/ui/SwipeableRow';
-import { ArrowLeft, Plus, Users, Receipt, Check, ArrowRightLeft, Trash2 } from 'lucide-react';
+import { ArrowLeft, Plus, Receipt, ArrowRightLeft, Trash2, UserMinus, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const TripDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { getTrip, endTrip, addExpense, updateExpense, deleteExpense, currencySymbol, userProfile } = useTrips();
+  const { getTrip, endTrip, addExpense, updateExpense, deleteExpense, addMemberToTrip, removeMemberFromTrip, currencySymbol, userProfile } = useTrips();
   const trip = getTrip(id || '');
 
   const [isEndModalOpen, setIsEndModalOpen] = useState(false);
@@ -18,6 +18,16 @@ const TripDetails: React.FC = () => {
   const [isDebtModalOpen, setIsDebtModalOpen] = useState(false);
   const [showMySplitsOnly, setShowMySplitsOnly] = useState(false);
   
+  // Member Management
+  const [isAddMemberModalOpen, setIsAddMemberModalOpen] = useState(false);
+  const [newMemberName, setNewMemberName] = useState('');
+  const [selectedMemberForAction, setSelectedMemberForAction] = useState<string | null>(null);
+
+  // Scrolling State for Members List
+  const memberListRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
   const [viewingExpense, setViewingExpense] = useState<Expense | null>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   
@@ -27,6 +37,52 @@ const TripDetails: React.FC = () => {
   const [category, setCategory] = useState<ExpenseCategory>(ExpenseCategory.FOOD);
   const [paidBy, setPaidBy] = useState('');
   const [splitAmong, setSplitAmong] = useState<string[]>([]);
+
+  // Calculate available members for the edit/add form
+  const displayMembers = useMemo(() => {
+    if (!trip) return [];
+    const baseMembers = [...trip.members];
+    if (editingExpense) {
+        if (!baseMembers.includes(editingExpense.paidBy)) baseMembers.push(editingExpense.paidBy);
+        editingExpense.splitAmong.forEach(m => {
+            if (!baseMembers.includes(m)) baseMembers.push(m);
+        });
+    }
+    return Array.from(new Set(baseMembers));
+  }, [trip, editingExpense]);
+
+  // Update Scroll Buttons visibility
+  const checkScrollButtons = () => {
+    if (memberListRef.current) {
+        const { scrollLeft, scrollWidth, clientWidth } = memberListRef.current;
+        setCanScrollLeft(scrollLeft > 0);
+        // Use a small threshold (1px) to avoid precision issues
+        setCanScrollRight(Math.ceil(scrollLeft) < scrollWidth - clientWidth - 1);
+    }
+  };
+
+  useEffect(() => {
+    // Check initially and whenever members change
+    checkScrollButtons();
+    // Also add a small timeout to ensure rendering is complete
+    const timeout = setTimeout(checkScrollButtons, 100);
+    window.addEventListener('resize', checkScrollButtons);
+    return () => {
+        window.removeEventListener('resize', checkScrollButtons);
+        clearTimeout(timeout);
+    };
+  }, [trip?.members]);
+
+  const scrollMembers = (direction: 'left' | 'right') => {
+    if (memberListRef.current) {
+        const scrollAmount = 200; 
+        const newScrollLeft = memberListRef.current.scrollLeft + (direction === 'left' ? -scrollAmount : scrollAmount);
+        memberListRef.current.scrollTo({
+            left: newScrollLeft,
+            behavior: 'smooth'
+        });
+    }
+  };
 
   React.useEffect(() => {
     if (isExpenseModalOpen && trip) {
@@ -114,6 +170,22 @@ const TripDetails: React.FC = () => {
     navigate('/history');
   };
 
+  const handleAddMember = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newMemberName.trim() && !trip.members.includes(newMemberName.trim())) {
+      addMemberToTrip(trip.id, newMemberName.trim());
+      setNewMemberName('');
+      setIsAddMemberModalOpen(false);
+    }
+  };
+
+  const handleRemoveMember = () => {
+    if (selectedMemberForAction) {
+      removeMemberFromTrip(trip.id, selectedMemberForAction);
+      setSelectedMemberForAction(null);
+    }
+  };
+
   const openAddModal = () => {
     setEditingExpense(null);
     setIsExpenseModalOpen(true);
@@ -132,7 +204,6 @@ const TripDetails: React.FC = () => {
   };
 
   const handleDeleteExpense = (expenseId: string) => {
-    // Immediate deletion without confirmation
     deleteExpense(trip.id, expenseId);
   };
 
@@ -221,6 +292,74 @@ const TripDetails: React.FC = () => {
                 </div>
             </div>
 
+            {/* Members Section */}
+            <div className="mb-6">
+                <div className="flex items-center justify-between px-2 mb-3">
+                    <h3 className="font-bold text-neutral-900 dark:text-white text-lg">Members</h3>
+                    <span className="text-xs font-bold text-neutral-400 bg-neutral-100 dark:bg-neutral-800 px-2 py-1 rounded-md">
+                        {trip.members.length}
+                    </span>
+                </div>
+                
+                <div className="relative group/members">
+                    {canScrollLeft && (
+                        <button
+                            onClick={() => scrollMembers('left')}
+                            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white/90 dark:bg-black/90 backdrop-blur-sm rounded-r-xl shadow-lg border-y border-r border-neutral-100 dark:border-neutral-800 text-neutral-600 dark:text-neutral-300 animate-in fade-in duration-200"
+                            aria-label="Scroll left"
+                        >
+                            <ChevronLeft size={20} />
+                        </button>
+                    )}
+
+                    <div 
+                        ref={memberListRef}
+                        onScroll={checkScrollButtons}
+                        className="flex gap-4 overflow-x-auto pb-4 px-2 -mx-2 scrollbar-none snap-x items-center"
+                    >
+                        {trip.status === 'ongoing' && (
+                            <button 
+                                onClick={() => setIsAddMemberModalOpen(true)}
+                                className="flex flex-col items-center gap-2 min-w-[60px] snap-start group"
+                            >
+                                <div className="w-14 h-14 rounded-2xl bg-neutral-100 dark:bg-neutral-900 border-2 border-dashed border-neutral-300 dark:border-neutral-700 flex items-center justify-center text-neutral-400 group-hover:border-brand-pink group-hover:text-brand-pink transition-colors">
+                                    <Plus size={24} />
+                                </div>
+                                <span className="text-xs font-bold text-neutral-400">Add</span>
+                            </button>
+                        )}
+
+                        {trip.members.map((member) => (
+                            <div 
+                                key={member} 
+                                onClick={() => trip.status === 'ongoing' && setSelectedMemberForAction(member)}
+                                className={`flex flex-col items-center gap-2 min-w-[60px] snap-start ${trip.status === 'ongoing' ? 'cursor-pointer active:scale-95 transition-transform' : ''}`}
+                            >
+                                <div className={`relative w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-bold shadow-sm border-2 ${member === userProfile.name ? 'bg-neutral-900 text-white border-neutral-900 dark:bg-white dark:text-black dark:border-white' : 'bg-white text-neutral-700 border-neutral-100 dark:bg-neutral-900 dark:text-neutral-300 dark:border-neutral-800'}`}>
+                                    {member.charAt(0).toUpperCase()}
+                                    {trip.status === 'ongoing' && member !== userProfile.name && (
+                                        <div className="absolute -top-1 -right-1 w-3 h-3 bg-neutral-200 dark:bg-neutral-700 rounded-full border border-white dark:border-black" />
+                                    )}
+                                </div>
+                                <span className="text-xs font-medium text-neutral-600 dark:text-neutral-400 text-center truncate w-full px-1">
+                                    {member === userProfile.name ? 'You' : member}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+
+                    {canScrollRight && (
+                        <button
+                            onClick={() => scrollMembers('right')}
+                            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white/90 dark:bg-black/90 backdrop-blur-sm rounded-l-xl shadow-lg border-y border-l border-neutral-100 dark:border-neutral-800 text-neutral-600 dark:text-neutral-300 animate-in fade-in duration-200"
+                            aria-label="Scroll right"
+                        >
+                            <ChevronRight size={20} />
+                        </button>
+                    )}
+                </div>
+            </div>
+
             {/* Expenses List */}
             <div className="flex justify-between items-center mb-4 px-2">
                 <h3 className="font-bold text-neutral-900 dark:text-white text-lg">Activity</h3>
@@ -288,6 +427,7 @@ const TripDetails: React.FC = () => {
         </button>
       )}
 
+      {/* Modals */}
       <Modal
         isOpen={isEndModalOpen}
         onClose={() => setIsEndModalOpen(false)}
@@ -300,6 +440,60 @@ const TripDetails: React.FC = () => {
             <Button variant="secondary" fullWidth onClick={() => setIsEndModalOpen(false)}>Cancel</Button>
             <Button variant="danger" fullWidth onClick={handleEndTrip}>End Event</Button>
         </div>
+      </Modal>
+
+      <Modal
+        isOpen={!!selectedMemberForAction}
+        onClose={() => setSelectedMemberForAction(null)}
+        title="Manage Member"
+      >
+        <div className="flex flex-col items-center mb-6">
+            <div className="w-20 h-20 rounded-full bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center text-3xl font-bold mb-4">
+                {selectedMemberForAction?.charAt(0).toUpperCase()}
+            </div>
+            <h3 className="text-xl font-bold text-neutral-900 dark:text-white">{selectedMemberForAction}</h3>
+            <p className="text-neutral-500 text-sm mt-1">Member of {trip.name}</p>
+        </div>
+        
+        <div className="space-y-3">
+            <Button 
+                variant="danger" 
+                fullWidth 
+                onClick={handleRemoveMember}
+                className="flex items-center justify-center gap-2"
+            >
+                <UserMinus size={18} />
+                Remove from Event
+            </Button>
+            <Button variant="secondary" fullWidth onClick={() => setSelectedMemberForAction(null)}>Cancel</Button>
+        </div>
+        <p className="text-xs text-neutral-400 text-center mt-4 px-4">
+            Removing a member will prevent them from being added to new expenses, but past expenses will remain unchanged.
+        </p>
+      </Modal>
+
+      <Modal
+        isOpen={isAddMemberModalOpen}
+        onClose={() => setIsAddMemberModalOpen(false)}
+        title="Add Member"
+      >
+        <form onSubmit={handleAddMember} className="space-y-4">
+            <div>
+                <label className="text-xs font-bold text-neutral-400 uppercase">Name</label>
+                <input 
+                    type="text" 
+                    value={newMemberName}
+                    onChange={e => setNewMemberName(e.target.value)}
+                    className="w-full mt-2 px-4 py-3 bg-neutral-50 dark:bg-neutral-900 rounded-xl border-none focus:ring-2 focus:ring-brand-pink text-neutral-900 dark:text-white placeholder-neutral-400 font-medium"
+                    placeholder="Enter name"
+                    autoFocus
+                />
+            </div>
+            <div className="flex gap-3">
+                 <Button type="button" variant="secondary" fullWidth onClick={() => setIsAddMemberModalOpen(false)}>Cancel</Button>
+                 <Button type="submit" fullWidth disabled={!newMemberName.trim()}>Add</Button>
+            </div>
+        </form>
       </Modal>
 
       <Modal
@@ -406,7 +600,7 @@ const TripDetails: React.FC = () => {
                         onChange={e => setPaidBy(e.target.value)}
                         className="w-full px-3 py-3 bg-neutral-100 dark:bg-neutral-900 rounded-xl border-none focus:ring-2 focus:ring-brand-pink text-sm font-bold text-neutral-900 dark:text-white outline-none"
                     >
-                        {trip.members.map(m => (
+                        {displayMembers.map(m => (
                             <option key={m} value={m}>{m}</option>
                         ))}
                     </select>
@@ -416,7 +610,7 @@ const TripDetails: React.FC = () => {
             <div>
                 <label className="block text-xs font-bold text-neutral-400 uppercase mb-2">Split Among</label>
                 <div className="grid grid-cols-2 gap-2">
-                    {trip.members.map(member => {
+                    {displayMembers.map(member => {
                         const isSelected = splitAmong.includes(member);
                         return (
                             <button
@@ -476,17 +670,11 @@ const TripDetails: React.FC = () => {
                 <div>
                     <label className="text-xs font-bold text-neutral-400 uppercase mb-2 block">Split Among</label>
                     <div className="flex flex-wrap gap-2">
-                        {viewingExpense.splitAmong.length === trip.members.length ? (
-                            <span className="w-full p-4 bg-brand-pink/10 text-brand-pink rounded-xl text-sm font-bold text-center">
-                                Everyone
+                        {viewingExpense.splitAmong.map(member => (
+                            <span key={member} className="px-3 py-2 bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 rounded-lg text-sm font-bold">
+                                {member}
                             </span>
-                        ) : (
-                            viewingExpense.splitAmong.map(member => (
-                                <span key={member} className="px-3 py-2 bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 rounded-lg text-sm font-bold">
-                                    {member}
-                                </span>
-                            ))
-                        )}
+                        ))}
                     </div>
                 </div>
 

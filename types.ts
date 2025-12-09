@@ -30,7 +30,11 @@ export interface Trip {
   endedAt?: number;
 }
 
-export type CurrencyCode = 'USD' | 'EUR' | 'GBP' | 'INR' | 'JPY' | 'CAD' | 'AUD';
+export type CurrencyCode = 
+  | 'USD' | 'EUR' | 'GBP' | 'INR' | 'JPY' | 'CAD' | 'AUD' 
+  | 'CNY' | 'KRW' | 'SGD' | 'HKD' | 'AED' | 'SAR' | 'QAR' 
+  | 'TRY' | 'THB' | 'IDR' | 'MYR' | 'VND' | 'PHP';
+
 export type ThemeOption = 'light' | 'dark' | 'system';
 
 export interface UserProfile {
@@ -53,4 +57,17 @@ export const CURRENCY_SYMBOLS: Record<CurrencyCode, string> = {
   JPY: '¥',
   CAD: 'C$',
   AUD: 'A$',
+  CNY: '¥',
+  KRW: '₩',
+  SGD: 'S$',
+  HKD: 'HK$',
+  AED: 'د.إ',
+  SAR: '﷼',
+  QAR: '﷼',
+  TRY: '₺',
+  THB: '฿',
+  IDR: 'Rp',
+  MYR: 'RM',
+  VND: '₫',
+  PHP: '₱',
 };

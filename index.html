@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>EventSplitter</title>
+    <title>SplitIt</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -11,9 +11,20 @@
         theme: {
           extend: {
             colors: {
-              slate: {
-                950: '#020617',
+              brand: {
+                pink: '#ec4899', // Pink-500
+                orange: '#f97316', // Orange-500
+                purple: '#a855f7', // Purple-500
+              },
+              neutral: {
+                850: '#1f1f1f',
+                900: '#121212',
+                950: '#000000',
               }
+            },
+            backgroundImage: {
+              'brand-gradient': 'linear-gradient(135deg, #f97316 0%, #ec4899 50%, #a855f7 100%)',
+              'brand-gradient-hover': 'linear-gradient(135deg, #fb923c 0%, #f472b6 50%, #c084fc 100%)',
             }
           }
         }
@@ -24,6 +35,10 @@
       body {
         -webkit-tap-highlight-color: transparent;
         overscroll-behavior-y: none;
+      }
+      ::-webkit-scrollbar {
+        width: 0px;
+        background: transparent;
       }
     </style>
   <script type="importmap">
@@ -38,10 +53,9 @@
 }
 </script>
 </head>
-  <body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 h-screen overflow-hidden flex flex-col transition-colors duration-200">
-    <div id="root" class="flex-1 flex flex-col h-full w-full max-w-md mx-auto bg-white dark:bg-slate-900 shadow-2xl overflow-hidden relative transition-colors duration-200"></div>
+  <body class="bg-white dark:bg-black text-neutral-900 dark:text-white h-screen overflow-hidden flex flex-col transition-colors duration-200 font-sans">
+    <div id="root" class="flex-1 flex flex-col h-full w-full max-w-md mx-auto bg-white dark:bg-black shadow-2xl overflow-hidden relative transition-colors duration-200 border-x border-neutral-100 dark:border-neutral-900"></div>
     <script>
-        // Prevent FOUC (Flash of Unstyled Content) by reading localStorage immediately
         try {
             const stored = localStorage.getItem('trip_splitter_data_v2');
             if (stored) {

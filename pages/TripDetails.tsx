@@ -18,11 +18,9 @@ const TripDetails: React.FC = () => {
   const [isDebtModalOpen, setIsDebtModalOpen] = useState(false);
   const [showMySplitsOnly, setShowMySplitsOnly] = useState(false);
   
-  // View Expense State
   const [viewingExpense, setViewingExpense] = useState<Expense | null>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   
-  // Expense Form State
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
@@ -30,7 +28,6 @@ const TripDetails: React.FC = () => {
   const [paidBy, setPaidBy] = useState('');
   const [splitAmong, setSplitAmong] = useState<string[]>([]);
 
-  // Initialize defaults when modal opens
   React.useEffect(() => {
     if (isExpenseModalOpen && trip) {
       if (editingExpense) {
@@ -107,7 +104,7 @@ const TripDetails: React.FC = () => {
     return debts;
   }, [debts, showMySplitsOnly, userProfile.name]);
 
-  if (!trip) return <div className="p-6 text-center text-slate-500 dark:text-slate-400">Event not found</div>;
+  if (!trip) return <div className="p-6 text-center text-neutral-500">Event not found</div>;
 
   const totalSpent = trip.expenses.reduce((acc, curr) => acc + curr.amount, 0);
 
@@ -135,9 +132,8 @@ const TripDetails: React.FC = () => {
   };
 
   const handleDeleteExpense = (expenseId: string) => {
-    if (confirm("Delete this expense?")) {
-        deleteExpense(trip.id, expenseId);
-    }
+    // Immediate deletion without confirmation
+    deleteExpense(trip.id, expenseId);
   };
 
   const handleSaveExpense = (e: React.FormEvent) => {
@@ -178,55 +174,63 @@ const TripDetails: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-slate-50 dark:bg-slate-950 transition-colors duration-200">
+    <div className="flex flex-col h-full bg-white dark:bg-black transition-colors duration-200">
       {/* Fixed Header */}
-      <div className="shrink-0 z-20 bg-white dark:bg-slate-900 px-4 py-3 shadow-sm flex justify-between items-center transition-colors">
-        <button onClick={() => navigate(-1)} className="p-2 -ml-2 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full">
+      <div className="shrink-0 z-20 bg-white dark:bg-black px-4 py-3 flex justify-between items-center transition-colors border-b border-neutral-100 dark:border-neutral-900">
+        <button onClick={() => navigate(-1)} className="p-2 -ml-2 text-neutral-900 dark:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900 rounded-full">
           <ArrowLeft size={24} />
         </button>
-        <h1 className="font-bold text-lg text-slate-800 dark:text-white truncate max-w-[200px]">{trip.name}</h1>
+        <h1 className="font-bold text-lg text-neutral-900 dark:text-white truncate max-w-[200px]">{trip.name}</h1>
         {trip.status === 'ongoing' ? (
              <button 
              onClick={() => setIsEndModalOpen(true)}
-             className="text-red-600 dark:text-red-400 font-medium text-sm px-3 py-1 bg-red-50 dark:bg-red-900/20 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30"
+             className="text-red-500 font-medium text-sm px-3 py-1 bg-red-50 dark:bg-red-900/10 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/20"
            >
              End
            </button>
         ) : <div className="w-8" />}
       </div>
 
-      {/* Scrollable Content Area */}
       <div className="flex-1 overflow-y-auto overflow-x-hidden relative">
-        <div className="p-4 pb-28"> {/* pb-28 to ensure content isn't hidden behind FAB */}
-            {/* Summary Card */}
-            <div className="bg-blue-600 dark:bg-blue-700 rounded-2xl p-6 text-white shadow-lg shadow-blue-200 dark:shadow-none mb-6">
-            <div className="text-blue-100 dark:text-blue-200 text-sm mb-1">Total Expenses</div>
-            <div className="flex justify-between items-end">
-                <div className="text-4xl font-bold">{currencySymbol}{totalSpent.toFixed(2)}</div>
-                <button 
-                onClick={() => setIsDebtModalOpen(true)}
-                className="bg-white/25 hover:bg-white/35 text-white px-6 py-3 rounded-xl text-base font-bold flex items-center gap-2 backdrop-blur-md shadow-sm transition-all active:scale-95"
-                >
-                <ArrowRightLeft size={18} />
-                Split
-                </button>
-            </div>
-            <div className="flex items-center gap-2 text-sm bg-blue-700/50 dark:bg-blue-800/50 p-2 rounded-lg w-fit mt-4">
-                <Users size={14} />
-                <span>{trip.members.length} members</span>
-            </div>
+        <div className="p-4 pb-28">
+            {/* Gradient Summary Card */}
+            <div className="bg-brand-gradient rounded-[2rem] p-6 text-white shadow-xl shadow-orange-500/20 dark:shadow-none mb-8 relative overflow-hidden">
+                <div className="relative z-10">
+                    <div className="text-white/80 text-sm font-medium mb-1">Total Expenses</div>
+                    <div className="flex justify-between items-end">
+                        <div className="text-5xl font-bold tracking-tight">{currencySymbol}{totalSpent.toFixed(2)}</div>
+                        
+                        {/* BIG SQUARED SPLIT BUTTON */}
+                        <button 
+                        onClick={() => setIsDebtModalOpen(true)}
+                        className="w-24 h-24 bg-white/20 hover:bg-white/30 text-white rounded-2xl font-bold flex flex-col items-center justify-center gap-1 backdrop-blur-md border border-white/20 transition-all active:scale-95 shadow-lg"
+                        >
+                        <ArrowRightLeft size={28} />
+                        <span className="text-sm">Split</span>
+                        </button>
+
+                    </div>
+                    <div className="flex items-center gap-2 text-sm mt-6">
+                        <div className="flex -space-x-2">
+                             {trip.members.slice(0, 4).map((m,i) => (
+                                 <div key={i} className="w-8 h-8 rounded-full bg-white/20 border border-white/30 flex items-center justify-center text-xs font-bold uppercase">{m.charAt(0)}</div>
+                             ))}
+                        </div>
+                        <span className="text-white/80 ml-2">{trip.members.length} members</span>
+                    </div>
+                </div>
             </div>
 
             {/* Expenses List */}
-            <div className="flex justify-between items-center mb-3 px-1">
-                <h3 className="font-bold text-slate-800 dark:text-white">Recent Expenses</h3>
-                {trip.status === 'ongoing' && <span className="text-xs text-slate-400">Swipe left to delete</span>}
+            <div className="flex justify-between items-center mb-4 px-2">
+                <h3 className="font-bold text-neutral-900 dark:text-white text-lg">Activity</h3>
+                {trip.status === 'ongoing' && <span className="text-xs text-neutral-400 uppercase tracking-wide font-bold">Swipe to delete</span>}
             </div>
             
-            <div className="space-y-0">
+            <div className="space-y-3">
                 {trip.expenses.length === 0 && (
-                    <div className="text-center py-8 text-slate-400 dark:text-slate-500 text-sm">
-                        No expenses yet. Add one!
+                    <div className="text-center py-12 text-neutral-400 dark:text-neutral-500 text-sm">
+                        No expenses yet. Tap + to start.
                     </div>
                 )}
                 {[...trip.expenses].reverse().map(expense => (
@@ -238,24 +242,23 @@ const TripDetails: React.FC = () => {
                     >
                         <div 
                             onClick={() => handleExpenseClick(expense)}
-                            className="group relative bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm flex items-center justify-between active:bg-slate-50 dark:active:bg-slate-800 transition-colors cursor-pointer overflow-hidden"
+                            className="group relative bg-neutral-50 dark:bg-neutral-900 p-4 rounded-2xl border border-transparent dark:border-neutral-800 flex items-center justify-between active:scale-[0.99] transition-all cursor-pointer overflow-hidden"
                         >
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0">
-                                <Receipt size={20} />
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-xl bg-white dark:bg-black text-brand-pink flex items-center justify-center shrink-0 shadow-sm border border-neutral-100 dark:border-neutral-800">
+                                <Receipt size={22} />
                                 </div>
                                 <div>
-                                    <div className="font-medium text-slate-800 dark:text-slate-200">{expense.description || expense.category}</div>
-                                    <div className="text-xs text-slate-500 dark:text-slate-400">
-                                        <span className="font-medium text-slate-700 dark:text-slate-300">{expense.paidBy}</span> paid for {expense.splitAmong.length === trip.members.length ? 'everyone' : `${expense.splitAmong.length} people`}
+                                    <div className="font-bold text-neutral-900 dark:text-white text-base">{expense.description || expense.category}</div>
+                                    <div className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
+                                        <span className="font-bold text-neutral-700 dark:text-neutral-300">{expense.paidBy}</span> paid
                                     </div>
                                 </div>
                             </div>
-                            <div className="font-bold text-slate-900 dark:text-white group-hover:opacity-0 transition-opacity">
+                            <div className="font-bold text-neutral-900 dark:text-white text-lg group-hover:opacity-0 transition-opacity">
                                 {currencySymbol}{expense.amount.toFixed(2)}
                             </div>
                             
-                            {/* Hover Delete Button */}
                             {trip.status === 'ongoing' && (
                                 <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                     <button
@@ -264,9 +267,8 @@ const TripDetails: React.FC = () => {
                                             handleDeleteExpense(expense.id);
                                         }}
                                         className="p-2 bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/60 transition-colors"
-                                        title="Delete Expense"
                                     >
-                                        <Trash2 size={18} />
+                                        <Trash2 size={20} />
                                     </button>
                                 </div>
                             )}
@@ -277,49 +279,46 @@ const TripDetails: React.FC = () => {
         </div>
       </div>
 
-      {/* Floating Action Button */}
       {trip.status === 'ongoing' && (
         <button
           onClick={openAddModal}
-          className="fixed bottom-24 right-6 w-14 h-14 bg-blue-600 dark:bg-blue-500 text-white rounded-full shadow-xl shadow-blue-300 dark:shadow-blue-900/50 flex items-center justify-center active:scale-90 transition-transform z-40"
+          className="fixed bottom-24 right-6 w-16 h-16 bg-brand-gradient text-white rounded-2xl shadow-xl shadow-pink-500/30 flex items-center justify-center active:scale-90 transition-transform z-40"
         >
-          <Plus size={28} />
+          <Plus size={32} />
         </button>
       )}
 
-      {/* End Trip Confirmation Modal */}
       <Modal
         isOpen={isEndModalOpen}
         onClose={() => setIsEndModalOpen(false)}
         title="End Event?"
       >
-        <p className="text-slate-600 dark:text-slate-300 mb-6">
+        <p className="text-neutral-600 dark:text-neutral-300 mb-6">
             Are you sure you want to end <strong>{trip.name}</strong>? This will move it to history.
         </p>
         <div className="flex gap-3">
-            <Button variant="secondary" fullWidth onClick={() => setIsEndModalOpen(false)}>No</Button>
-            <Button variant="danger" fullWidth onClick={handleEndTrip}>Yes, End it</Button>
+            <Button variant="secondary" fullWidth onClick={() => setIsEndModalOpen(false)}>Cancel</Button>
+            <Button variant="danger" fullWidth onClick={handleEndTrip}>End Event</Button>
         </div>
       </Modal>
 
-      {/* Debts/Split Modal */}
       <Modal
         isOpen={isDebtModalOpen}
         onClose={() => setIsDebtModalOpen(false)}
         title="Who Owes Who"
       >
         <div className="space-y-4">
-          <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100 dark:border-slate-800">
-                <span className="text-sm font-bold text-slate-700 dark:text-slate-300">Filter Splits</span>
+          <div className="flex items-center justify-between pb-2 mb-2 border-b border-neutral-100 dark:border-neutral-800">
+                <span className="text-sm font-bold text-neutral-700 dark:text-neutral-300">Filter</span>
                 <div className="flex items-center gap-2">
-                    <span className={`text-xs font-medium transition-colors ${showMySplitsOnly ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400'}`}>
+                    <span className={`text-xs font-bold transition-colors ${showMySplitsOnly ? 'text-brand-pink' : 'text-neutral-400'}`}>
                         {showMySplitsOnly ? 'My Splits' : 'All Splits'}
                     </span>
                     <button 
                         role="switch"
                         aria-checked={showMySplitsOnly}
                         onClick={() => setShowMySplitsOnly(!showMySplitsOnly)}
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${showMySplitsOnly ? 'bg-blue-600' : 'bg-slate-200 dark:bg-slate-700'}`}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${showMySplitsOnly ? 'bg-brand-pink' : 'bg-neutral-200 dark:bg-neutral-800'}`}
                     >
                         <span className={`${showMySplitsOnly ? 'translate-x-6' : 'translate-x-1'} inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-sm`} />
                     </button>
@@ -327,18 +326,18 @@ const TripDetails: React.FC = () => {
           </div>
 
           {displayedDebts.length === 0 ? (
-            <div className="text-center text-slate-500 dark:text-slate-400 py-8">
-              {showMySplitsOnly ? "You don't owe or receive anything!" : "Everything is settled up!"}
+            <div className="text-center text-neutral-500 dark:text-neutral-400 py-8 font-medium">
+              All settled up!
             </div>
           ) : (
             displayedDebts.map((transaction, idx) => (
-              <div key={idx} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-xl animate-in slide-in-from-right-2 duration-300" style={{ animationDelay: `${idx * 50}ms` }}>
+              <div key={idx} className="flex items-center justify-between p-4 bg-neutral-50 dark:bg-neutral-900 rounded-xl animate-in slide-in-from-right-2 duration-300" style={{ animationDelay: `${idx * 50}ms` }}>
                 <div className="flex items-center gap-2">
-                  <span className={`font-bold ${transaction.from === userProfile.name ? 'text-blue-600 dark:text-blue-400' : 'text-slate-700 dark:text-slate-200'}`}>{transaction.from === userProfile.name ? 'You' : transaction.from}</span>
-                  <span className="text-xs text-slate-400">owes</span>
-                  <span className={`font-bold ${transaction.to === userProfile.name ? 'text-blue-600 dark:text-blue-400' : 'text-slate-700 dark:text-slate-200'}`}>{transaction.to === userProfile.name ? 'You' : transaction.to}</span>
+                  <span className={`font-bold ${transaction.from === userProfile.name ? 'text-black dark:text-white' : 'text-neutral-600 dark:text-neutral-400'}`}>{transaction.from === userProfile.name ? 'You' : transaction.from}</span>
+                  <span className="text-xs text-neutral-400">owes</span>
+                  <span className={`font-bold ${transaction.to === userProfile.name ? 'text-black dark:text-white' : 'text-neutral-600 dark:text-neutral-400'}`}>{transaction.to === userProfile.name ? 'You' : transaction.to}</span>
                 </div>
-                <div className="font-bold text-emerald-600 dark:text-emerald-400">
+                <div className="font-bold text-brand-pink text-lg">
                   {currencySymbol}{transaction.amount.toFixed(2)}
                 </div>
               </div>
@@ -348,52 +347,49 @@ const TripDetails: React.FC = () => {
         </div>
       </Modal>
 
-      {/* Add/Edit Expense Modal */}
       <Modal
         isOpen={isExpenseModalOpen}
         onClose={() => setIsExpenseModalOpen(false)}
         title={editingExpense ? "Edit Expense" : "Add Expense"}
       >
-        <form onSubmit={handleSaveExpense} className="space-y-4">
+        <form onSubmit={handleSaveExpense} className="space-y-5">
             <div>
-                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Amount</label>
-                <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">{currencySymbol}</span>
+                <div className="relative flex items-center justify-center py-4">
+                    <span className="absolute left-8 top-1/2 -translate-y-1/2 text-neutral-300 font-bold text-2xl">{currencySymbol}</span>
                     <input 
                         type="number" 
                         step="0.01" 
                         required
                         value={amount}
                         onChange={e => setAmount(e.target.value)}
-                        className="w-full pl-8 pr-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-xl border-none focus:ring-2 focus:ring-blue-500 font-bold text-lg text-slate-900 dark:text-white placeholder-slate-400"
-                        placeholder="0.00"
+                        className="w-full text-center py-2 bg-transparent border-b-2 border-neutral-100 dark:border-neutral-800 focus:border-brand-pink font-bold text-4xl text-neutral-900 dark:text-white placeholder-neutral-200 outline-none transition-colors"
+                        placeholder="0"
                     />
                 </div>
             </div>
 
             <div>
-                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Description (Optional)</label>
                 <input 
                     type="text" 
                     value={description}
                     onChange={e => setDescription(e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-xl border-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white placeholder-slate-400"
-                    placeholder="e.g. Dinner at Mario's"
+                    className="w-full px-4 py-4 bg-neutral-50 dark:bg-neutral-900 rounded-2xl border-none focus:ring-2 focus:ring-brand-pink text-neutral-900 dark:text-white placeholder-neutral-400 font-medium"
+                    placeholder="What was this for?"
                 />
             </div>
 
             <div>
-                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-2">Category</label>
+                <label className="block text-xs font-bold text-neutral-400 uppercase mb-2">Category</label>
                 <div className="flex flex-wrap gap-2">
                     {Object.values(ExpenseCategory).map(c => (
                         <button
                             key={c}
                             type="button"
                             onClick={() => setCategory(c)}
-                            className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors border ${
+                            className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${
                                 category === c
-                                ? 'bg-blue-600 border-blue-600 text-white shadow-md'
-                                : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700'
+                                ? 'bg-neutral-900 dark:bg-white text-white dark:text-black shadow-lg transform scale-105'
+                                : 'bg-neutral-100 dark:bg-neutral-900 text-neutral-500 dark:text-neutral-500'
                             }`}
                         >
                             {c}
@@ -402,21 +398,23 @@ const TripDetails: React.FC = () => {
                 </div>
             </div>
 
-            <div>
-                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Paid By</label>
-                <select 
-                    value={paidBy} 
-                    onChange={e => setPaidBy(e.target.value)}
-                    className="w-full px-3 py-3 bg-slate-50 dark:bg-slate-800 rounded-xl border-none focus:ring-2 focus:ring-blue-500 text-sm text-slate-900 dark:text-white"
-                >
-                    {trip.members.map(m => (
-                        <option key={m} value={m}>{m}</option>
-                    ))}
-                </select>
+            <div className="grid grid-cols-2 gap-4">
+                <div>
+                    <label className="block text-xs font-bold text-neutral-400 uppercase mb-2">Paid By</label>
+                    <select 
+                        value={paidBy} 
+                        onChange={e => setPaidBy(e.target.value)}
+                        className="w-full px-3 py-3 bg-neutral-100 dark:bg-neutral-900 rounded-xl border-none focus:ring-2 focus:ring-brand-pink text-sm font-bold text-neutral-900 dark:text-white outline-none"
+                    >
+                        {trip.members.map(m => (
+                            <option key={m} value={m}>{m}</option>
+                        ))}
+                    </select>
+                </div>
             </div>
 
             <div>
-                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-2">Split Among</label>
+                <label className="block text-xs font-bold text-neutral-400 uppercase mb-2">Split Among</label>
                 <div className="grid grid-cols-2 gap-2">
                     {trip.members.map(member => {
                         const isSelected = splitAmong.includes(member);
@@ -425,17 +423,15 @@ const TripDetails: React.FC = () => {
                                 key={member}
                                 type="button"
                                 onClick={() => toggleSplitMember(member)}
-                                className={`relative px-3 py-2 rounded-lg text-sm font-bold transition-all border-2 ${
+                                className={`relative px-3 py-3 rounded-xl text-sm font-bold transition-all border-2 ${
                                     isSelected 
-                                    ? 'bg-emerald-50 dark:bg-emerald-900/30 border-emerald-500 dark:border-emerald-500 text-emerald-700 dark:text-emerald-400 shadow-sm' 
-                                    : 'bg-slate-100 dark:bg-slate-800 border-transparent text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                                    ? 'bg-brand-pink/10 border-brand-pink text-brand-pink' 
+                                    : 'bg-neutral-50 dark:bg-neutral-900 border-transparent text-neutral-400'
                                 }`}
                             >
                                 {member}
                                 {isSelected && (
-                                    <div className="absolute -top-2 -right-2 bg-emerald-500 text-white rounded-full p-0.5 shadow-sm">
-                                        <Check size={10} strokeWidth={4} />
-                                    </div>
+                                    <div className="absolute top-1 right-1 w-2 h-2 bg-brand-pink rounded-full"></div>
                                 )}
                             </button>
                         )
@@ -444,12 +440,11 @@ const TripDetails: React.FC = () => {
             </div>
 
             <Button type="submit" fullWidth className="mt-4">
-                {editingExpense ? 'Update Expense' : 'Add Expense'}
+                {editingExpense ? 'Save Changes' : 'Add Expense'}
             </Button>
         </form>
       </Modal>
 
-      {/* View Expense Modal */}
       <Modal
         isOpen={isViewModalOpen}
         onClose={() => setIsViewModalOpen(false)}
@@ -457,41 +452,37 @@ const TripDetails: React.FC = () => {
       >
         {viewingExpense && (
             <div className="space-y-6">
-                {/* Amount & Category */}
-                <div className="flex flex-col items-center justify-center py-6 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-800">
-                    <span className="text-4xl font-bold text-slate-900 dark:text-white mb-2">
+                <div className="flex flex-col items-center justify-center py-8 bg-neutral-50 dark:bg-neutral-900 rounded-3xl border border-neutral-100 dark:border-neutral-800">
+                    <span className="text-5xl font-bold text-neutral-900 dark:text-white mb-2 tracking-tight">
                         {currencySymbol}{viewingExpense.amount.toFixed(2)}
                     </span>
-                    <span className="px-4 py-1.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-bold uppercase tracking-wider rounded-full">
+                    <span className="px-4 py-1.5 bg-neutral-200 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 text-xs font-bold uppercase tracking-wider rounded-full">
                         {viewingExpense.category}
                     </span>
                 </div>
 
-                {/* Description */}
                 <div>
-                    <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">Description</label>
-                    <p className="text-slate-800 dark:text-slate-200 font-medium mt-1">
+                    <label className="text-xs font-bold text-neutral-400 uppercase">Description</label>
+                    <p className="text-lg text-neutral-900 dark:text-white font-medium mt-1">
                         {viewingExpense.description || "No description provided."}
                     </p>
                 </div>
 
-                {/* Paid By */}
-                <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800 rounded-xl">
-                    <span className="text-sm text-slate-500 dark:text-slate-400 font-medium">Paid by</span>
-                    <span className="font-bold text-slate-900 dark:text-white">{viewingExpense.paidBy}</span>
+                <div className="flex items-center justify-between p-4 bg-neutral-50 dark:bg-neutral-900 rounded-2xl">
+                    <span className="text-sm text-neutral-500 font-bold">Paid by</span>
+                    <span className="font-bold text-neutral-900 dark:text-white text-lg">{viewingExpense.paidBy}</span>
                 </div>
 
-                {/* Split Among */}
                 <div>
-                    <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-2 block">Split Among</label>
+                    <label className="text-xs font-bold text-neutral-400 uppercase mb-2 block">Split Among</label>
                     <div className="flex flex-wrap gap-2">
                         {viewingExpense.splitAmong.length === trip.members.length ? (
-                            <span className="w-full p-3 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 rounded-xl text-sm font-bold text-center">
+                            <span className="w-full p-4 bg-brand-pink/10 text-brand-pink rounded-xl text-sm font-bold text-center">
                                 Everyone
                             </span>
                         ) : (
                             viewingExpense.splitAmong.map(member => (
-                                <span key={member} className="px-3 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-medium">
+                                <span key={member} className="px-3 py-2 bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 rounded-lg text-sm font-bold">
                                     {member}
                                 </span>
                             ))

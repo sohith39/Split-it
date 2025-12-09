@@ -6,6 +6,9 @@ interface TripContextType {
   userProfile: UserProfile;
   settings: AppSettings;
   currencySymbol: string;
+  isAuthenticated: boolean;
+  login: (username: string, phoneNumber?: string, avatarColor?: string) => void;
+  logout: () => void;
   addTrip: (name: string, members: string[]) => void;
   addExpense: (tripId: string, expense: Omit<Expense, 'id' | 'timestamp'>) => void;
   updateExpense: (tripId: string, expense: Expense) => void;
@@ -23,18 +26,19 @@ const TripContext = createContext<TripContextType | undefined>(undefined);
 const STORAGE_KEY = 'trip_splitter_data_v2';
 
 const DEFAULT_PROFILE: UserProfile = {
-  name: 'Traveler',
+  name: '', // Empty initially to force onboarding/setup
   phoneNumber: '',
   avatarColor: '#3b82f6',
 };
 
 const DEFAULT_SETTINGS: AppSettings = {
-  currency: 'USD',
+  currency: 'INR',
   theme: 'system',
 };
 
 export const TripProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [data, setData] = useState<{
+    isAuthenticated: boolean;
     trips: Trip[];
     profile: UserProfile;
     settings: AppSettings;
@@ -43,9 +47,9 @@ export const TripProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
-        // Migration or fallback for new fields
         return {
-          trips: parsed.trips || (Array.isArray(parsed) ? parsed : []), // Handle legacy array format
+          isAuthenticated: parsed.isAuthenticated || false,
+          trips: parsed.trips || [],
           profile: { ...DEFAULT_PROFILE, ...parsed.profile },
           settings: { ...DEFAULT_SETTINGS, ...parsed.settings },
         };
@@ -53,7 +57,7 @@ export const TripProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     } catch (e) {
       console.error("Failed to load data", e);
     }
-    return { trips: [], profile: DEFAULT_PROFILE, settings: DEFAULT_SETTINGS };
+    return { isAuthenticated: false, trips: [], profile: DEFAULT_PROFILE, settings: DEFAULT_SETTINGS };
   });
 
   // Persist Data
@@ -78,7 +82,6 @@ export const TripProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     applyTheme(data.settings.theme);
 
-    // Listener for system changes
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleChange = () => {
       if (data.settings.theme === 'system') {
@@ -89,6 +92,27 @@ export const TripProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     mediaQuery.addEventListener('change', handleChange);
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, [data.settings.theme]);
+
+  const login = (username: string, phoneNumber?: string, avatarColor?: string) => {
+    // Override name to match the login credential (e.g. Google Name)
+    setData(prev => ({
+      ...prev,
+      isAuthenticated: true,
+      profile: { 
+        ...prev.profile, 
+        name: username,
+        phoneNumber: phoneNumber || prev.profile.phoneNumber,
+        avatarColor: avatarColor || prev.profile.avatarColor
+      }
+    }));
+  };
+
+  const logout = () => {
+    setData(prev => ({
+      ...prev,
+      isAuthenticated: false
+    }));
+  };
 
   const addTrip = (name: string, members: string[]) => {
     const newTrip: Trip = {
@@ -183,6 +207,9 @@ export const TripProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       userProfile: data.profile, 
       settings: data.settings,
       currencySymbol: CURRENCY_SYMBOLS[data.settings.currency],
+      isAuthenticated: data.isAuthenticated,
+      login,
+      logout,
       addTrip, 
       addExpense,
       updateExpense,

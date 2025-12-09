@@ -1,13 +1,15 @@
 import React, { useState, useRef } from 'react';
 import { useTrips } from '../context/TripContext';
-import { User, DollarSign, Moon, Smartphone, Trash2, Sun, Monitor, AlertCircle, Camera, Upload } from 'lucide-react';
+import { User, DollarSign, Moon, Smartphone, Trash2, Sun, Monitor, AlertCircle, Camera, Upload, LogOut } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
 import { CurrencyCode, ThemeOption, CURRENCY_SYMBOLS } from '../types';
 
 const Settings: React.FC = () => {
-  const { userProfile, settings, trips, updateProfile, updateSettings, clearHistory, deleteTrip } = useTrips();
+  const { userProfile, settings, trips, updateProfile, updateSettings, clearHistory, deleteTrip, logout } = useTrips();
   const [isClearHistoryModalOpen, setIsClearHistoryModalOpen] = useState(false);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [tripToDelete, setTripToDelete] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const endedTrips = trips.filter(t => t.status === 'ended');
@@ -27,10 +29,37 @@ const Settings: React.FC = () => {
     fileInputRef.current?.click();
   };
 
+  const handleLogoutClick = () => {
+    setIsLogoutModalOpen(true);
+  };
+
+  const confirmLogout = () => {
+    logout();
+    setIsLogoutModalOpen(false);
+  };
+
+  const handleDeleteTripClick = (tripId: string) => {
+    setTripToDelete(tripId);
+  };
+
+  const confirmDeleteTrip = () => {
+    if (tripToDelete) {
+      deleteTrip(tripToDelete);
+      setTripToDelete(null);
+    }
+  };
+
   return (
     <div className="p-6 space-y-8 dark:text-neutral-100 pb-20">
-      <header>
+      <header className="flex justify-between items-center">
         <h1 className="text-3xl font-bold text-neutral-900 dark:text-white">Settings</h1>
+        <button 
+          onClick={handleLogoutClick}
+          className="p-2 text-neutral-400 hover:text-red-500 transition-colors rounded-full hover:bg-red-50 dark:hover:bg-red-900/10"
+          title="Log Out"
+        >
+          <LogOut size={24} />
+        </button>
       </header>
 
       {/* Profile Section */}
@@ -47,7 +76,7 @@ const Settings: React.FC = () => {
                     {userProfile.avatarImage ? (
                         <img src={userProfile.avatarImage} alt="Profile" className="w-full h-full object-cover" />
                     ) : (
-                        userProfile.name.charAt(0).toUpperCase()
+                        (userProfile.name || 'U').charAt(0).toUpperCase()
                     )}
                 </div>
                 <button 
@@ -163,7 +192,7 @@ const Settings: React.FC = () => {
                 <div key={trip.id} className="flex items-center justify-between p-4 border-b border-neutral-100 dark:border-neutral-800 last:border-0">
                     <span className="font-bold text-neutral-700 dark:text-neutral-300 truncate max-w-[150px]">{trip.name}</span>
                     <button 
-                        onClick={() => deleteTrip(trip.id)}
+                        onClick={() => handleDeleteTripClick(trip.id)}
                         className="text-neutral-400 hover:text-red-500 transition-colors"
                     >
                         <Trash2 size={18} />
@@ -181,6 +210,12 @@ const Settings: React.FC = () => {
             </button>
         </div>
       </section>
+
+      <div className="pt-4">
+          <Button variant="secondary" fullWidth onClick={handleLogoutClick} className="text-red-500 dark:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10">
+              Log Out
+          </Button>
+      </div>
 
       <Modal
         isOpen={isClearHistoryModalOpen}
@@ -203,6 +238,50 @@ const Settings: React.FC = () => {
                 }}
             >
                 Clear All
+            </Button>
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={isLogoutModalOpen}
+        onClose={() => setIsLogoutModalOpen(false)}
+        title="Log Out?"
+      >
+        <div className="flex flex-col items-center text-center mb-6">
+            <p className="text-neutral-600 dark:text-neutral-300">
+                Are you sure you want to log out?
+            </p>
+        </div>
+        <div className="flex gap-3">
+            <Button variant="secondary" fullWidth onClick={() => setIsLogoutModalOpen(false)}>Cancel</Button>
+            <Button 
+                variant="danger" 
+                fullWidth 
+                onClick={confirmLogout}
+            >
+                Log Out
+            </Button>
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={!!tripToDelete}
+        onClose={() => setTripToDelete(null)}
+        title="Delete Event?"
+      >
+        <div className="flex flex-col items-center text-center mb-6">
+            <p className="text-neutral-600 dark:text-neutral-300">
+                Are you sure you want to permanently delete this event?
+            </p>
+        </div>
+        <div className="flex gap-3">
+            <Button variant="secondary" fullWidth onClick={() => setTripToDelete(null)}>Cancel</Button>
+            <Button 
+                variant="danger" 
+                fullWidth 
+                onClick={confirmDeleteTrip}
+            >
+                Delete
             </Button>
         </div>
       </Modal>

@@ -40,8 +40,8 @@ export type ThemeOption = 'light' | 'dark' | 'system';
 export interface UserProfile {
   name: string;
   phoneNumber: string;
-  avatarColor: string; // Storing a color hex instead of image for simplicity/performance
-  avatarImage?: string; // Base64 string for custom profile picture
+  avatarColor: string; 
+  avatarImage?: string;
 }
 
 export interface AppSettings {

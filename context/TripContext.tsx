@@ -1,3 +1,5 @@
+'use client';
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Trip, Expense, UserProfile, AppSettings, CURRENCY_SYMBOLS, CurrencyCode, ThemeOption } from '../types';
 
@@ -7,6 +9,7 @@ interface TripContextType {
   settings: AppSettings;
   currencySymbol: string;
   isAuthenticated: boolean;
+  isLoading: boolean;
   login: (username: string, phoneNumber?: string, avatarColor?: string) => void;
   logout: () => void;
   addTrip: (name: string, members: string[]) => void;
@@ -28,7 +31,7 @@ const TripContext = createContext<TripContextType | undefined>(undefined);
 const STORAGE_KEY = 'trip_splitter_data_v2';
 
 const DEFAULT_PROFILE: UserProfile = {
-  name: '', // Empty initially to force onboarding/setup
+  name: '',
   phoneNumber: '',
   avatarColor: '#3b82f6',
 };
@@ -44,31 +47,46 @@ export const TripProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     trips: Trip[];
     profile: UserProfile;
     settings: AppSettings;
-  }>(() => {
+  }>({ 
+    isAuthenticated: false, 
+    trips: [], 
+    profile: DEFAULT_PROFILE, 
+    settings: DEFAULT_SETTINGS 
+  });
+  
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Load Data on Mount (Client-side only)
+  useEffect(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
-        return {
+        setData({
           isAuthenticated: parsed.isAuthenticated || false,
           trips: parsed.trips || [],
           profile: { ...DEFAULT_PROFILE, ...parsed.profile },
           settings: { ...DEFAULT_SETTINGS, ...parsed.settings },
-        };
+        });
       }
     } catch (e) {
       console.error("Failed to load data", e);
+    } finally {
+      setIsLoading(false);
     }
-    return { isAuthenticated: false, trips: [], profile: DEFAULT_PROFILE, settings: DEFAULT_SETTINGS };
-  });
+  }, []);
 
   // Persist Data
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  }, [data]);
+    if (!isLoading) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+  }, [data, isLoading]);
 
   // Theme Logic
   useEffect(() => {
+    if (isLoading) return;
+    
     const root = window.document.documentElement;
     const applyTheme = (theme: ThemeOption) => {
       const isDark = 
@@ -93,10 +111,9 @@ export const TripProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     
     mediaQuery.addEventListener('change', handleChange);
     return () => mediaQuery.removeEventListener('change', handleChange);
-  }, [data.settings.theme]);
+  }, [data.settings.theme, isLoading]);
 
   const login = (username: string, phoneNumber?: string, avatarColor?: string) => {
-    // Override name to match the login credential (e.g. Google Name)
     setData(prev => ({
       ...prev,
       isAuthenticated: true,
@@ -231,11 +248,12 @@ export const TripProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       settings: data.settings,
       currencySymbol: CURRENCY_SYMBOLS[data.settings.currency],
       isAuthenticated: data.isAuthenticated,
+      isLoading,
       login,
       logout,
       addTrip,
       addMemberToTrip,
-      removeMemberFromTrip, 
+      removeMemberFromTrip,
       addExpense,
       updateExpense,
       deleteExpense,

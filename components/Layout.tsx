@@ -2,6 +2,12 @@ import React from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { Home, PlusCircle, History, Settings } from 'lucide-react';
 
+const IconContainer = ({ children }: { children?: React.ReactNode }) => (
+  <div className="h-[38px] flex items-center justify-center relative">
+    {children}
+  </div>
+);
+
 const Layout: React.FC = () => {
   const navLinkClass = ({ isActive }: { isActive: boolean }) => 
     `flex flex-col items-center justify-center gap-1 w-full h-full transition-colors ${
@@ -9,12 +15,6 @@ const Layout: React.FC = () => {
         ? 'text-brand-pink dark:text-white' 
         : 'text-neutral-400 dark:text-neutral-600 hover:text-neutral-600 dark:hover:text-neutral-300'
     }`;
-
-  const IconContainer = ({ children }: { children: React.ReactNode }) => (
-    <div className="h-[38px] flex items-center justify-center relative">
-      {children}
-    </div>
-  );
 
   return (
     <div className="flex flex-col h-full bg-white dark:bg-black transition-colors duration-200">

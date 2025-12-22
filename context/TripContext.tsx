@@ -234,7 +234,30 @@ export const TripProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const getTrip = (id: string) => data.trips.find(t => t.id === id);
 
   const updateProfile = (profileUpdate: Partial<UserProfile>) => {
-    setData(prev => ({ ...prev, profile: { ...prev.profile, ...profileUpdate } }));
+    setData(prev => {
+      const oldName = prev.profile.name;
+      const newName = profileUpdate.name;
+      let updatedTrips = prev.trips;
+
+      // Propagate name change to all trips and expenses
+      if (newName && oldName && newName !== oldName) {
+        updatedTrips = prev.trips.map(trip => ({
+          ...trip,
+          members: trip.members.map(m => m === oldName ? newName : m),
+          expenses: trip.expenses.map(exp => ({
+            ...exp,
+            paidBy: exp.paidBy === oldName ? newName : exp.paidBy,
+            splitAmong: exp.splitAmong.map(m => m === oldName ? newName : m)
+          }))
+        }));
+      }
+
+      return { 
+        ...prev, 
+        profile: { ...prev.profile, ...profileUpdate },
+        trips: updatedTrips
+      };
+    });
   };
 
   const updateSettings = (settingsUpdate: Partial<AppSettings>) => {

@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useTrips } from '@/context/TripContext';
-import { User, DollarSign, Moon, Smartphone, Trash2, Sun, Monitor, AlertCircle, Camera, Upload, LogOut } from 'lucide-react';
+import { User, DollarSign, Moon, Smartphone, Trash2, Sun, Monitor, AlertCircle, Camera, Upload, LogOut, Check } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
 import { CurrencyCode, ThemeOption, CURRENCY_SYMBOLS } from '@/types';
@@ -13,6 +13,17 @@ export default function Settings() {
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [tripToDelete, setTripToDelete] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Local state for profile edits
+  const [tempName, setTempName] = useState(userProfile.name);
+  const [tempPhone, setTempPhone] = useState(userProfile.phoneNumber || '');
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [showSavedToast, setShowSavedToast] = useState(false);
+
+  useEffect(() => {
+    setTempName(userProfile.name);
+    setTempPhone(userProfile.phoneNumber || '');
+  }, [userProfile.name, userProfile.phoneNumber]);
 
   const endedTrips = trips.filter(t => t.status === 'ended');
 
@@ -51,6 +62,21 @@ export default function Settings() {
     }
   };
 
+  const handleSaveProfile = () => {
+    if (!tempName.trim()) return;
+    setIsSavingProfile(true);
+    updateProfile({ name: tempName, phoneNumber: tempPhone });
+    
+    // Simulate some saving feedback
+    setTimeout(() => {
+      setIsSavingProfile(false);
+      setShowSavedToast(true);
+      setTimeout(() => setShowSavedToast(false), 3000);
+    }, 600);
+  };
+
+  const isProfileChanged = tempName !== userProfile.name || tempPhone !== (userProfile.phoneNumber || '');
+
   return (
     <div className="p-6 space-y-8 dark:text-neutral-100 pb-20">
       <header className="flex justify-between items-center">
@@ -66,7 +92,15 @@ export default function Settings() {
 
       {/* Profile Section */}
       <section className="space-y-4">
-        <h2 className="text-xs font-bold text-neutral-400 uppercase tracking-widest">Profile</h2>
+        <div className="flex justify-between items-end">
+            <h2 className="text-xs font-bold text-neutral-400 uppercase tracking-widest">Profile</h2>
+            {showSavedToast && (
+                <span className="text-[10px] font-bold text-green-500 flex items-center gap-1 animate-in fade-in slide-in-from-bottom-1">
+                    <Check size={10} /> Profile Updated
+                </span>
+            )}
+        </div>
+        
         <div className="bg-white dark:bg-neutral-900 p-4 rounded-3xl border border-neutral-100 dark:border-neutral-800 space-y-4 shadow-sm">
           <div className="flex items-center gap-4">
             <div className="relative group">
@@ -78,7 +112,7 @@ export default function Settings() {
                     {userProfile.avatarImage ? (
                         <img src={userProfile.avatarImage} alt="Profile" className="w-full h-full object-cover" />
                     ) : (
-                        (userProfile.name || 'U').charAt(0).toUpperCase()
+                        (tempName || 'U').charAt(0).toUpperCase()
                     )}
                 </div>
                 <button 
@@ -101,8 +135,8 @@ export default function Settings() {
                 <label className="text-[10px] font-bold text-neutral-400 uppercase">Name</label>
                 <input
                     type="text"
-                    value={userProfile.name}
-                    onChange={(e) => updateProfile({ name: e.target.value })}
+                    value={tempName}
+                    onChange={(e) => setTempName(e.target.value)}
                     placeholder="Your Name"
                     className="w-full px-0 py-1 bg-transparent border-b border-neutral-200 dark:border-neutral-800 rounded-none text-lg font-bold text-neutral-900 dark:text-white focus:border-brand-pink outline-none placeholder:text-neutral-300"
                 />
@@ -112,8 +146,8 @@ export default function Settings() {
                 <label className="text-[10px] font-bold text-neutral-400 uppercase">Phone</label>
                 <input
                     type="tel"
-                    value={userProfile.phoneNumber || ''}
-                    onChange={(e) => updateProfile({ phoneNumber: e.target.value })}
+                    value={tempPhone}
+                    onChange={(e) => setTempPhone(e.target.value)}
                     placeholder="Phone Number"
                     className="w-full px-0 py-1 bg-transparent border-b border-neutral-200 dark:border-neutral-800 rounded-none text-sm font-medium text-neutral-900 dark:text-white focus:border-brand-pink outline-none placeholder:text-neutral-300"
                 />
@@ -121,15 +155,26 @@ export default function Settings() {
             </div>
           </div>
           
-          <div className="flex gap-2 pt-2 overflow-x-auto pb-2">
-              {['#ec4899', '#f97316', '#a855f7', '#3b82f6', '#10b981'].map(color => (
-                  <button
-                      key={color}
-                      onClick={() => updateProfile({ avatarColor: color })}
-                      className={`w-8 h-8 rounded-full border-2 transition-transform shrink-0 ${userProfile.avatarColor === color ? 'border-neutral-900 dark:border-white scale-110' : 'border-transparent'}`}
-                      style={{ backgroundColor: color }}
-                  />
-              ))}
+          <div className="flex items-center justify-between pt-2 border-t border-neutral-50 dark:border-neutral-800/50">
+              <div className="flex gap-2 overflow-x-auto scrollbar-none">
+                  {['#ec4899', '#f97316', '#a855f7', '#3b82f6', '#10b981'].map(color => (
+                      <button
+                          key={color}
+                          onClick={() => updateProfile({ avatarColor: color })}
+                          className={`w-6 h-6 rounded-full border transition-transform shrink-0 ${userProfile.avatarColor === color ? 'border-neutral-900 dark:border-white scale-125' : 'border-transparent'}`}
+                          style={{ backgroundColor: color }}
+                      />
+                  ))}
+              </div>
+
+              <Button 
+                variant="primary" 
+                className={`py-1.5 px-4 text-xs ${!isProfileChanged ? 'opacity-30 grayscale cursor-not-allowed' : ''}`}
+                onClick={handleSaveProfile}
+                disabled={!isProfileChanged || isSavingProfile}
+              >
+                {isSavingProfile ? 'Saving...' : 'Save Profile'}
+              </Button>
           </div>
         </div>
       </section>

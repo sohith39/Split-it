@@ -16,7 +16,7 @@ export default function Home() {
             <h1 className="text-3xl font-bold text-neutral-900 dark:text-white">SplitIt</h1>
             <p className="text-neutral-500 dark:text-neutral-400 text-sm mt-1">Welcome back, {userProfile.name}</p>
         </div>
-        <div className="p-[2px] rounded-full bg-brand-gradient">
+        <Link href="/settings" className="p-[2px] rounded-full bg-brand-gradient active:scale-95 transition-transform">
             <div 
                 className="w-10 h-10 rounded-full border-2 border-white dark:border-black flex items-center justify-center text-white text-sm font-bold overflow-hidden"
                 style={{ backgroundColor: userProfile.avatarImage ? 'transparent' : userProfile.avatarColor }}
@@ -27,7 +27,7 @@ export default function Home() {
                     (userProfile.name || 'U').charAt(0).toUpperCase()
                 )}
             </div>
-        </div>
+        </Link>
       </header>
 
       {ongoingTrips.length === 0 ? (

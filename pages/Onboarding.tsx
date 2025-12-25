@@ -91,7 +91,7 @@ const Onboarding: React.FC = () => {
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <label className="text-xs font-bold text-neutral-400 uppercase ml-1">Display Name</label>
+              <label className="text-xs font-bold text-neutral-400 uppercase ml-1">Username</label>
               <input
                 type="text"
                 placeholder="e.g. John Doe"

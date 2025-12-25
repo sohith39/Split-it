@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTrips } from '../context/TripContext';
 import { Button } from '../components/ui/Button';
-import { ArrowRight, AlertCircle } from 'lucide-react';
+import { ArrowRight, AlertCircle, RefreshCw } from 'lucide-react';
+import { SplitItLogo } from '../components/ui/Logo';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -13,8 +14,9 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
+  const [isPending, setIsPending] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
@@ -28,12 +30,8 @@ const Login: React.FC = () => {
             setError('Please enter your phone number.');
             return;
         }
-        if (password.length < 8) {
-            setError('Password must be at least 8 characters long.');
-            return;
-        }
-        if (!/\d/.test(password)) {
-            setError('Password must contain at least one number.');
+        if (password.length < 6) {
+            setError('Password must be at least 6 characters long.');
             return;
         }
         if (password !== confirmPassword) {
@@ -42,12 +40,18 @@ const Login: React.FC = () => {
         }
     }
 
-    login(username, isSignUp ? phoneNumber : undefined);
-    
-    if (isSignUp) {
-      navigate('/onboarding');
-    } else {
-      navigate('/');
+    setIsPending(true);
+    try {
+      await login(username, password, isSignUp, isSignUp ? phoneNumber : undefined);
+      if (isSignUp) {
+        navigate('/onboarding');
+      } else {
+        navigate('/');
+      }
+    } catch (e: any) {
+      setError(e.message || 'Authentication failed. Please check your connection.');
+    } finally {
+      setIsPending(false);
     }
   };
 
@@ -65,14 +69,14 @@ const Login: React.FC = () => {
         
         {/* Header */}
         <div className="text-center space-y-2">
-          <div className="w-16 h-16 bg-brand-gradient rounded-3xl mx-auto flex items-center justify-center shadow-lg shadow-brand-pink/30 mb-6">
-             <span className="text-3xl text-white font-bold">S</span>
+          <div className="mb-6 flex justify-center">
+             <SplitItLogo size={80} />
           </div>
           <h1 className="text-3xl font-bold text-neutral-900 dark:text-white">
             {isSignUp ? 'Create Account' : 'Welcome Back'}
           </h1>
           <p className="text-neutral-500 dark:text-neutral-400">
-            {isSignUp ? 'Sign up to start tracking expenses' : 'Enter your details to sign in'}
+            {isSignUp ? 'Sign up to sync with Turso cloud' : 'Enter your details to sign in'}
           </p>
         </div>
 
@@ -86,6 +90,7 @@ const Login: React.FC = () => {
               onChange={(e) => setUsername(e.target.value)}
               className="w-full px-4 py-4 rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 text-neutral-900 dark:text-white focus:border-brand-pink focus:ring-2 focus:ring-brand-pink/20 transition-all outline-none placeholder:text-neutral-400 font-medium"
               required
+              disabled={isPending}
             />
             
             {isSignUp && (
@@ -97,6 +102,7 @@ const Login: React.FC = () => {
                         onChange={(e) => setPhoneNumber(e.target.value)}
                         className="w-full px-4 py-4 rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 text-neutral-900 dark:text-white focus:border-brand-pink focus:ring-2 focus:ring-brand-pink/20 transition-all outline-none placeholder:text-neutral-400 font-medium"
                         required
+                        disabled={isPending}
                     />
                 </div>
             )}
@@ -108,6 +114,7 @@ const Login: React.FC = () => {
               onChange={(e) => setPassword(e.target.value)}
               className="w-full px-4 py-4 rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 text-neutral-900 dark:text-white focus:border-brand-pink focus:ring-2 focus:ring-brand-pink/20 transition-all outline-none placeholder:text-neutral-400 font-medium"
               required
+              disabled={isPending}
             />
             
             {isSignUp && (
@@ -119,6 +126,7 @@ const Login: React.FC = () => {
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         className="w-full px-4 py-4 rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 text-neutral-900 dark:text-white focus:border-brand-pink focus:ring-2 focus:ring-brand-pink/20 transition-all outline-none placeholder:text-neutral-400 font-medium"
                         required
+                        disabled={isPending}
                     />
                 </div>
             )}
@@ -131,10 +139,16 @@ const Login: React.FC = () => {
             </div>
           )}
 
-          <Button type="submit" fullWidth className="mt-2 group">
+          <Button type="submit" fullWidth className="mt-2 group" disabled={isPending}>
             <span className="flex items-center justify-center gap-2">
-              {isSignUp ? 'Sign Up' : 'Sign In'}
-              <ArrowRight size={18} className="group-active:translate-x-1 transition-transform" />
+              {isPending ? (
+                  <RefreshCw size={18} className="animate-spin" />
+              ) : (
+                  <>
+                    {isSignUp ? 'Sign Up' : 'Sign In'}
+                    <ArrowRight size={18} className="group-active:translate-x-1 transition-transform" />
+                  </>
+              )}
             </span>
           </Button>
         </form>
@@ -145,6 +159,7 @@ const Login: React.FC = () => {
             type="button"
             onClick={toggleMode}
             className="text-brand-pink font-bold hover:underline"
+            disabled={isPending}
           >
             {isSignUp ? 'Log in' : 'Sign up'}
           </button>

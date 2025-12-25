@@ -1,3 +1,8 @@
+/**
+ * This file acts as the "Frame" for the app.
+ * It puts the navigation bar at the bottom and leaves a space in the middle 
+ * for the different pages (Home, History, etc.) to show up.
+ */
 import React from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { Home, PlusCircle, History, Settings } from 'lucide-react';
@@ -18,10 +23,12 @@ const Layout: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full bg-white dark:bg-black transition-colors duration-200">
+      {/* This is the area where the current page is displayed */}
       <main className="flex-1 overflow-y-auto overflow-x-hidden pb-24">
         <Outlet />
       </main>
       
+      {/* Bottom Navigation Bar */}
       <nav className="fixed bottom-0 w-full max-w-md bg-white dark:bg-black border-t border-neutral-100 dark:border-neutral-900 z-50 transition-colors duration-200">
         <div className="grid grid-cols-4 w-full h-[80px] pb-2">
           <NavLink to="/" className={navLinkClass}>

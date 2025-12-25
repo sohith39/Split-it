@@ -9,6 +9,8 @@ import TripDetails from './pages/TripDetails';
 import Settings from './pages/Settings';
 import Login from './pages/Login';
 import Onboarding from './pages/Onboarding';
+import Friends from './pages/Friends';
+import Notifications from './pages/Notifications';
 
 const ProtectedRoute = () => {
   const { isAuthenticated } = useTrips();
@@ -37,6 +39,8 @@ const AppRoutes = () => {
           <Route path="/add-trip" element={<AddTrip />} />
           <Route path="/history" element={<History />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/friends" element={<Friends />} />
+          <Route path="/notifications" element={<Notifications />} />
         </Route>
         
         {/* TripDetails outside layout */}

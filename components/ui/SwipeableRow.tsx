@@ -28,52 +28,57 @@ export const SwipeableRow: React.FC<SwipeableRowProps> = ({ children, onDelete, 
     if (touchStartX.current === null) return;
     const diff = e.touches[0].clientX - touchStartX.current;
     
-    // Calculate new potential offset
-    // Only allow swiping left (negative)
     let newOffset = startOffset.current + diff;
     
-    // Resistance limits
-    if (newOffset > 0) newOffset = 0; // Prevent swipe right
-    if (newOffset < -100) newOffset = -100; // Max delete width + some resistance
+    if (newOffset > 0) newOffset = 0; 
+    if (newOffset < -100) newOffset = -100; 
     
     setOffset(newOffset);
   };
 
   const handleTouchEnd = () => {
     if (offset < -50) {
-      setOffset(-80); // Snap open
+      setOffset(-80); 
     } else {
-      setOffset(0); // Snap closed
+      setOffset(0); 
     }
     touchStartX.current = null;
   };
 
   const handleClick = (e: React.MouseEvent) => {
+    // If we are swiped open, a click anywhere closes it
     if (offset !== 0) {
-      // If open, close it
       setOffset(0);
-      e.stopPropagation(); // Prevent edit click if we are just closing the swipe
+      e.stopPropagation();
     } else {
+      // Otherwise, the page handles the edit/view via handleExpenseClick in parent
       onEdit();
     }
   };
 
   return (
-    <div className="relative mb-3 overflow-hidden select-none touch-pan-y">
-      {/* Background Actions */}
-      <div className="absolute inset-y-0 right-0 w-20 bg-red-500 rounded-xl flex items-center justify-center z-0">
+    <div className="relative mb-3 overflow-hidden select-none touch-pan-y group">
+      {/* Background Actions Layer - Higher Z when open to be clickable */}
+      <div 
+        className={`absolute inset-y-0 right-0 w-20 bg-red-500 rounded-xl flex items-center justify-center transition-opacity ${offset < -20 ? 'opacity-100 z-30' : 'opacity-0 z-0'}`}
+      >
         <button 
-          onClick={(e) => { e.stopPropagation(); onDelete(); }}
-          className="w-full h-full flex items-center justify-center text-white"
+          type="button"
+          onClick={(e) => { 
+            e.stopPropagation(); 
+            onDelete(); 
+            setOffset(0);
+          }}
+          className="w-full h-full flex items-center justify-center text-white active:scale-90 transition-transform"
         >
-          <Trash2 size={20} />
+          <Trash2 size={22} />
         </button>
       </div>
 
       {/* Foreground Content */}
       <div 
         ref={rowRef}
-        className="relative z-10 transition-transform duration-200 ease-out bg-transparent"
+        className="relative z-10 transition-transform duration-200 ease-out bg-transparent cursor-pointer"
         style={{ transform: `translateX(${offset}px)` }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}

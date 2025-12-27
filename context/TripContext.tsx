@@ -1,15 +1,10 @@
-/**
- * This file is the "Brain" of the application. 
- * It manages the app's state (what you see on screen) and handles saving/loading 
- * that data by talking to the CloudService.
- */
+
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
-import { Trip, Expense, UserProfile, AppSettings, CURRENCY_SYMBOLS, AppData, CloudSyncStatus, Friend, Notification } from '../types';
-import { cloudService } from '../services/CloudService';
+import { Trip, Expense, UserProfile, AppSettings, CURRENCY_SYMBOLS, AppData, CloudSyncStatus, Friend, Notification } from '../types.ts';
+import { cloudService } from '../services/CloudService.ts';
 
-// Fallback for environments where crypto.randomUUID is not available
 const generateId = () => {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
     return crypto.randomUUID();
@@ -55,8 +50,6 @@ interface TripContextType {
 }
 
 const TripContext = createContext<TripContextType | undefined>(undefined);
-
-// Key used to store data on your phone/browser memory temporarily
 const STORAGE_KEY = 'trip_splitter_data_v3';
 
 const DEFAULT_PROFILE: UserProfile = {
@@ -86,7 +79,6 @@ export const TripProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [isLoading, setIsLoading] = useState(true);
   const [cloudStatus, setCloudStatus] = useState<CloudSyncStatus>('idle');
 
-  // [PULL POINT - LOCAL] Load from local storage immediately on mount
   useEffect(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
@@ -111,7 +103,6 @@ export const TripProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   }, []);
 
-  // [PUSH POINT - LOCAL] Sync state to localStorage whenever it changes
   useEffect(() => {
     if (!isLoading) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -120,24 +111,22 @@ export const TripProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const refreshFriendsAndNotifications = useCallback(async () => {
     if (!data.isAuthenticated || !data.profile.name) return;
-    const cloudData = await cloudService.fetchUserData(data.profile.name);
-    if (cloudData) {
-      setData(prev => ({
-        ...prev,
-        friends: cloudData.friends,
-        notifications: cloudData.notifications,
-        sentNotifications: cloudData.sentNotifications,
-        trips: cloudData.trips,
-        profile: cloudData.profile,
-        settings: cloudData.settings
-      }));
-    }
+    try {
+      const cloudData = await cloudService.fetchUserData(data.profile.name);
+      if (cloudData) {
+        setData(prev => ({
+          ...prev,
+          friends: cloudData.friends,
+          notifications: cloudData.notifications,
+          sentNotifications: cloudData.sentNotifications,
+          trips: cloudData.trips,
+          profile: cloudData.profile,
+          settings: cloudData.settings
+        }));
+      }
+    } catch (e) {}
   }, [data.isAuthenticated, data.profile.name]);
 
-  /**
-   * [PUSH POINT - TURSO CLOUD] 
-   * Debounced background sync for general updates.
-   */
   useEffect(() => {
     if (isLoading || !data.isAuthenticated) return;
 
@@ -239,14 +228,10 @@ export const TripProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       createdAt: Date.now(),
     };
     
-    // 1. Update local state immediately
     const updatedData = { ...data, trips: [newTrip, ...data.trips] };
     setData(updatedData);
-
-    // 2. Perform immediate local storage write
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedData));
 
-    // 3. Trigger immediate cloud sync for this critical event
     if (data.isAuthenticated) {
         setCloudStatus('syncing');
         await cloudService.syncToCloud(updatedData);
@@ -257,28 +242,23 @@ export const TripProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const addMemberToTrip = (tripId: string, member: string) => {
-    setData(prev => {
-      return {
-        ...prev,
-        trips: prev.trips.map(trip => {
-          if (trip.id !== tripId) return trip;
-          if (trip.members.includes(member)) return trip;
-          return { ...trip, members: [...trip.members, member] };
-        })
-      };
-    });
+    setData(prev => ({
+      ...prev,
+      trips: prev.trips.map(trip => {
+        if (trip.id !== tripId) return trip;
+        if (trip.members.includes(member)) return trip;
+        return { ...trip, members: [...trip.members, member] };
+      })
+    }));
   };
 
   const removeMemberFromTrip = async (tripId: string, member: string) => {
     const trip = data.trips.find(t => t.id === tripId);
     if (!trip) return;
-
     const isOwner = trip.participants.includes(member);
-
     if (data.isAuthenticated && isOwner) {
         await cloudService.removeParticipant(tripId, member);
     }
-
     setData(prev => ({
       ...prev,
       trips: prev.trips.map(t => {
@@ -290,7 +270,6 @@ export const TripProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           };
       })
     }));
-
     if (member === data.profile.name) {
         setData(prev => ({ ...prev, trips: prev.trips.filter(t => t.id !== tripId) }));
     }
@@ -345,7 +324,6 @@ export const TripProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const oldName = prev.profile.name;
       const newName = profileUpdate.name;
       let updatedTrips = prev.trips;
-
       if (newName && oldName && newName !== oldName) {
         updatedTrips = prev.trips.map(trip => ({
           ...trip,
@@ -358,7 +336,6 @@ export const TripProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           }))
         }));
       }
-
       return { ...prev, profile: { ...prev.profile, ...profileUpdate }, trips: updatedTrips };
     });
   };

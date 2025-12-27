@@ -1,16 +1,17 @@
+
 import React from 'react';
 import { HashRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
-import { TripProvider, useTrips } from './context/TripContext';
-import Layout from './components/Layout';
-import Home from './pages/Home';
-import AddTrip from './pages/AddTrip';
-import History from './pages/History';
-import TripDetails from './pages/TripDetails';
-import Settings from './pages/Settings';
-import Login from './pages/Login';
-import Onboarding from './pages/Onboarding';
-import Friends from './pages/Friends';
-import Notifications from './pages/Notifications';
+import { TripProvider, useTrips } from './context/TripContext.tsx';
+import Layout from './components/Layout.tsx';
+import Home from './pages/Home.tsx';
+import AddTrip from './pages/AddTrip.tsx';
+import History from './pages/History.tsx';
+import TripDetails from './pages/TripDetails.tsx';
+import Settings from './pages/Settings.tsx';
+import Login from './pages/Login.tsx';
+import Onboarding from './pages/Onboarding.tsx';
+import Friends from './pages/Friends.tsx';
+import Notifications from './pages/Notifications.tsx';
 
 const ProtectedRoute = () => {
   const { isAuthenticated } = useTrips();
@@ -25,12 +26,10 @@ const PublicRoute = () => {
 const AppRoutes = () => {
   return (
     <Routes>
-      {/* Public Routes (Login) */}
       <Route element={<PublicRoute />}>
         <Route path="/login" element={<Login />} />
       </Route>
 
-      {/* Protected Routes */}
       <Route element={<ProtectedRoute />}>
         <Route path="/onboarding" element={<Onboarding />} />
         
@@ -43,11 +42,9 @@ const AppRoutes = () => {
           <Route path="/notifications" element={<Notifications />} />
         </Route>
         
-        {/* TripDetails outside layout */}
         <Route path="/trip/:id" element={<TripDetails />} />
       </Route>
 
-      {/* Catch all */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

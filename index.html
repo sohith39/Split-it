@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -12,9 +13,9 @@
           extend: {
             colors: {
               brand: {
-                pink: '#ec4899', // Pink-500
-                orange: '#f97316', // Orange-500
-                purple: '#a855f7', // Purple-500
+                pink: '#ec4899',
+                orange: '#f97316',
+                purple: '#a855f7',
               },
               neutral: {
                 850: '#1f1f1f',
@@ -31,7 +32,6 @@
       }
     </script>
     <style>
-      /* Mobile-like touch behavior */
       body {
         -webkit-tap-highlight-color: transparent;
         overscroll-behavior-y: none;
@@ -41,32 +41,36 @@
         background: transparent;
       }
     </style>
-  <script type="importmap">
+    <script type="importmap">
 {
   "imports": {
-    "react/": "https://aistudiocdn.com/react@^19.2.1/",
-    "react": "https://aistudiocdn.com/react@^19.2.1",
-    "react-router-dom": "https://aistudiocdn.com/react-router-dom@^7.10.1",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
-    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.556.0",
-    "tailwindcss": "https://esm.sh/tailwindcss@^4.1.17",
-    "next/": "https://esm.sh/next@^16.0.8/",
-    "next": "https://esm.sh/next@^16.0.8",
+    "react": "https://esm.sh/react@19.0.0",
+    "react-dom": "https://esm.sh/react-dom@19.0.0",
+    "react-dom/client": "https://esm.sh/react-dom@19.0.0/client",
+    "react-router-dom": "https://esm.sh/react-router-dom@7?external=react,react-dom",
+    "lucide-react": "https://esm.sh/lucide-react@0.454.0?external=react",
     "@libsql/client/web": "https://esm.sh/@libsql/client@0.14.0/web",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "tailwindcss": "https://esm.sh/tailwindcss@^4.1.18",
+    "next/": "https://esm.sh/next@^16.1.1/",
     "@libsql/client/": "https://esm.sh/@libsql/client@^0.15.15/"
   }
 }
 </script>
-</head>
+  </head>
   <body class="bg-white dark:bg-black text-neutral-900 dark:text-white h-screen overflow-hidden flex flex-col transition-colors duration-200 font-sans">
     <div id="root" class="flex-1 flex flex-col h-full w-full max-w-md mx-auto bg-white dark:bg-black shadow-2xl overflow-hidden relative transition-colors duration-200 border-x border-neutral-100 dark:border-neutral-900"></div>
+    
+    <!-- Entry point for the React App -->
+    <script type="module" src="index.tsx"></script>
+
     <script>
         try {
-            const stored = localStorage.getItem('trip_splitter_data_v2');
+            const stored = localStorage.getItem('trip_splitter_data_v3');
             if (stored) {
                 const data = JSON.parse(stored);
                 const theme = data.settings?.theme || 'system';
-                
                 if (theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                     document.documentElement.classList.add('dark');
                 }

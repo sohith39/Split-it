@@ -2,7 +2,7 @@
  * This file is the "Telephone Line" to the database.
  * It uses the Turso URL and Secret Key to establish a connection.
  */
-import { createClient } from "@libsql/client";
+import { createClient } from "@libsql/client/web";
 
 /**
  * Professional libSQL client initialization.

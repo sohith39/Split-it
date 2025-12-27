@@ -518,24 +518,24 @@ export default function TripDetails({ params }: { params: { id: string } }) {
                     <div className="w-16 h-16 bg-neutral-100 dark:bg-neutral-800 rounded-2xl flex items-center justify-center mx-auto text-brand-pink">
                         {CATEGORY_ICONS[viewingExpense.category] || <Receipt size={32} />}
                     </div>
-                    <div className="text-3xl font-bold tracking-tight">{currencySymbol}{viewingExpense.amount.toFixed(2)}</div>
+                    <div className="text-3xl font-bold tracking-tight text-neutral-900 dark:text-white">{currencySymbol}{viewingExpense.amount.toFixed(2)}</div>
                     <div className="text-neutral-500 font-medium">{viewingExpense.description || viewingExpense.category}</div>
                 </div>
 
                 <div className="space-y-4">
                     <div className="flex justify-between items-center text-sm">
-                        <span className="text-neutral-400 font-bold uppercase text-[10px]">Paid By</span>
-                        <span className="font-bold">{viewingExpense.paidBy}</span>
+                        <span className="text-neutral-500 dark:text-neutral-400 font-bold uppercase text-[10px]">Paid By</span>
+                        <span className="font-bold text-neutral-900 dark:text-white">{viewingExpense.paidBy}</span>
                     </div>
                     <div className="flex justify-between items-center text-sm">
-                        <span className="text-neutral-400 font-bold uppercase text-[10px]">Date</span>
-                        <span className="font-bold">{new Date(viewingExpense.timestamp).toLocaleDateString()}</span>
+                        <span className="text-neutral-500 dark:text-neutral-400 font-bold uppercase text-[10px]">Date</span>
+                        <span className="font-bold text-neutral-900 dark:text-white">{new Date(viewingExpense.timestamp).toLocaleDateString()}</span>
                     </div>
                     <div className="pt-2 border-t border-neutral-100 dark:border-neutral-800">
-                        <span className="text-neutral-400 font-bold uppercase text-[10px] block mb-2">Split Among</span>
+                        <span className="text-neutral-500 dark:text-neutral-400 font-bold uppercase text-[10px] block mb-2">Split Among</span>
                         <div className="flex flex-wrap gap-1.5">
                             {viewingExpense.splitAmong.map(m => (
-                                <span key={m} className="px-2.5 py-1 bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-lg text-xs font-bold border border-neutral-200 dark:border-neutral-700">
+                                <span key={m} className="px-2.5 py-1 bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-white rounded-lg text-xs font-bold border border-neutral-200 dark:border-neutral-700">
                                     {m}
                                 </span>
                             ))}

@@ -13,52 +13,50 @@ import Friends from './pages/Friends';
 import Notifications from './pages/Notifications';
 
 const ProtectedRoute = () => {
-  const { isAuthenticated } = useTrips();
+  const { isAuthenticated, isLoading } = useTrips();
+  if (isLoading) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-white dark:bg-black">
+        <div className="w-8 h-8 border-4 border-brand-pink border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
   return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
 };
 
 const PublicRoute = () => {
-  const { isAuthenticated } = useTrips();
+  const { isAuthenticated, isLoading } = useTrips();
+  if (isLoading) return null;
   return !isAuthenticated ? <Outlet /> : <Navigate to="/" replace />;
-};
-
-const AppRoutes = () => {
-  return (
-    <Routes>
-      {/* Public Routes (Login) */}
-      <Route element={<PublicRoute />}>
-        <Route path="/login" element={<Login />} />
-      </Route>
-
-      {/* Protected Routes */}
-      <Route element={<ProtectedRoute />}>
-        <Route path="/onboarding" element={<Onboarding />} />
-        
-        <Route element={<Layout />}>
-          <Route path="/" element={<Home />} />
-          <Route path="/add-trip" element={<AddTrip />} />
-          <Route path="/history" element={<History />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/friends" element={<Friends />} />
-          <Route path="/notifications" element={<Notifications />} />
-        </Route>
-        
-        {/* TripDetails outside layout */}
-        <Route path="/trip/:id" element={<TripDetails />} />
-      </Route>
-
-      {/* Catch all */}
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
-  );
 };
 
 const App: React.FC = () => {
   return (
     <TripProvider>
-      <Router>
-        <AppRoutes />
-      </Router>
+      <div className="flex-1 flex flex-col h-screen w-full max-w-md mx-auto bg-white dark:bg-black shadow-2xl overflow-hidden relative transition-colors duration-200 border-x border-neutral-100 dark:border-neutral-900">
+        <Router>
+          <Routes>
+            <Route element={<PublicRoute />}>
+              <Route path="/login" element={<Login />} />
+            </Route>
+
+            <Route element={<ProtectedRoute />}>
+              <Route path="/onboarding" element={<Onboarding />} />
+              <Route element={<Layout />}>
+                <Route index element={<Home />} />
+                <Route path="/add-trip" element={<AddTrip />} />
+                <Route path="/history" element={<History />} />
+                <Route path="/settings" element={<Settings />} />
+                <Route path="/friends" element={<Friends />} />
+                <Route path="/notifications" element={<Notifications />} />
+              </Route>
+              <Route path="/trip/:id" element={<TripDetails />} />
+            </Route>
+
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Router>
+      </div>
     </TripProvider>
   );
 };

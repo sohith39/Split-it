@@ -1,71 +1,50 @@
-/**
- * This file acts as the "Frame" for the app.
- * It puts the navigation bar at the bottom and leaves a space in the middle 
- * for the different pages (Home, History, etc.) to show up.
- */
+
 import React from 'react';
-import { NavLink, Outlet } from 'react-router-dom';
+import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { Home, PlusCircle, History, Settings } from 'lucide-react';
 
-const IconContainer = ({ children }: { children?: React.ReactNode }) => (
-  <div className="h-[38px] flex items-center justify-center relative">
-    {children}
-  </div>
-);
-
 const Layout: React.FC = () => {
+  const location = useLocation();
+  const hideNav = location.pathname.startsWith('/trip/') || location.pathname === '/onboarding';
+
   const navLinkClass = ({ isActive }: { isActive: boolean }) => 
-    `flex flex-col items-center justify-center gap-1 w-full h-full transition-colors ${
+    `flex flex-col items-center justify-center gap-1 w-full h-full transition-all ${
       isActive 
-        ? 'text-brand-pink dark:text-white' 
-        : 'text-neutral-400 dark:text-neutral-600 hover:text-neutral-600 dark:hover:text-neutral-300'
+        ? 'text-brand-pink dark:text-white scale-110' 
+        : 'text-neutral-400 dark:text-neutral-600'
     }`;
 
   return (
     <div className="flex flex-col h-full bg-white dark:bg-black transition-colors duration-200">
-      {/* This is the area where the current page is displayed */}
-      <main className="flex-1 overflow-y-auto overflow-x-hidden pb-24">
+      <main className={`flex-1 overflow-y-auto overflow-x-hidden ${hideNav ? '' : 'pb-24'}`}>
         <Outlet />
       </main>
       
-      {/* Bottom Navigation Bar */}
-      <nav className="fixed bottom-0 w-full max-w-md bg-white dark:bg-black border-t border-neutral-100 dark:border-neutral-900 z-50 transition-colors duration-200">
-        <div className="grid grid-cols-4 w-full h-[80px] pb-2">
-          <NavLink to="/" className={navLinkClass}>
-             <IconContainer>
+      {!hideNav && (
+        <nav className="fixed bottom-0 w-full max-w-md bg-white/80 dark:bg-black/80 backdrop-blur-lg border-t border-neutral-100 dark:border-neutral-900 z-50 transition-colors duration-200">
+          <div className="grid grid-cols-4 w-full h-[80px] pb-2">
+            <NavLink to="/" className={navLinkClass}>
                <Home size={24} strokeWidth={2.5} />
-             </IconContainer>
-             <span className="text-[10px] font-bold tracking-wide">Home</span>
-          </NavLink>
+               <span className="text-[10px] font-bold">Home</span>
+            </NavLink>
 
-          <NavLink to="/add-trip" className={navLinkClass}>
-            {({ isActive }) => (
-              <>
-                <IconContainer>
-                  <div className={`p-1.5 rounded-full transition-colors ${isActive ? 'bg-neutral-100 dark:bg-neutral-900' : ''}`}>
-                    <PlusCircle size={26} strokeWidth={2.5} className={isActive ? 'text-brand-pink dark:text-white' : 'text-neutral-400 dark:text-neutral-600'} />
-                  </div>
-                </IconContainer>
-                <span className="text-[10px] font-bold tracking-wide">New Event</span>
-              </>
-            )}
-          </NavLink>
+            <NavLink to="/add-trip" className={navLinkClass}>
+               <PlusCircle size={26} strokeWidth={2.5} />
+               <span className="text-[10px] font-bold">New</span>
+            </NavLink>
 
-          <NavLink to="/history" className={navLinkClass}>
-            <IconContainer>
+            <NavLink to="/history" className={navLinkClass}>
               <History size={24} strokeWidth={2.5} />
-            </IconContainer>
-            <span className="text-[10px] font-bold tracking-wide">History</span>
-          </NavLink>
+              <span className="text-[10px] font-bold">History</span>
+            </NavLink>
 
-          <NavLink to="/settings" className={navLinkClass}>
-            <IconContainer>
+            <NavLink to="/settings" className={navLinkClass}>
               <Settings size={24} strokeWidth={2.5} />
-            </IconContainer>
-            <span className="text-[10px] font-bold tracking-wide">Settings</span>
-          </NavLink>
-        </div>
-      </nav>
+              <span className="text-[10px] font-bold">Settings</span>
+            </NavLink>
+          </div>
+        </nav>
+      )}
     </div>
   );
 };

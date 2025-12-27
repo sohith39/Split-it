@@ -7,7 +7,7 @@ export const ClientLayout = ({ children }: { children?: React.ReactNode }) => {
   const pathname = usePathname();
   
   // Hide bottom nav on specific pages
-  const hideNav = pathname === '/login' || pathname === '/onboarding' || pathname.startsWith('/trip/');
+  const hideNav = pathname === '/login' || pathname === '/onboarding' || pathname?.startsWith('/trip/');
 
   return (
     <div className="flex flex-col h-full bg-white dark:bg-black transition-colors duration-200">

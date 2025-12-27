@@ -1,5 +1,5 @@
 import React from 'react';
-// Removed Metadata import to fix module resolution error
+import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { TripProvider } from "@/context/TripContext";
@@ -8,8 +8,7 @@ import AuthGuard from "@/components/AuthGuard";
 
 const inter = Inter({ subsets: ["latin"] });
 
-// Fixed: Removed explicit Metadata type annotation to resolve import error
-export const metadata = {
+export const metadata: Metadata = {
   title: "SplitIt",
   description: "A mobile-first expense tracker",
   viewport: "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no",

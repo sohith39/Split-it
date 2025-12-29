@@ -4,14 +4,14 @@
  * or invite actual accounts (Co-Owners) who can edit the event too.
  */
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { useTrips } from '../context/TripContext';
 import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
 import { Plus, X, User, Users, Search, Check, Sparkles, RefreshCw } from 'lucide-react';
 
 const AddTrip: React.FC = () => {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { addTrip, userProfile, friends, inviteFriendToTrip, forceSync } = useTrips();
   
   const [tripName, setTripName] = useState('');
@@ -86,7 +86,7 @@ const AddTrip: React.FC = () => {
         // 3. Verify sync before exiting
         await forceSync();
         
-        navigate('/');
+        router.push('/');
       } catch (err) {
         console.error("Creation failed:", err);
         setIsCreating(false);

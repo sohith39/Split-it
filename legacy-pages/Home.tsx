@@ -1,12 +1,16 @@
-'use client';
-
+/**
+ * The Home page is your "Dashboard".
+ * It displays your ongoing events and provides quick links to your friends, 
+ * notifications, and profile.
+ */
 import React from 'react';
 import Link from 'next/link';
-import { useTrips } from '@/context/TripContext';
+import { useTrips } from '../context/TripContext';
 import { ChevronRight, Calendar, Users, Bell, UserPlus } from 'lucide-react';
-import { SplitItLogo } from '@/components/ui/Logo';
+import { SplitItLogo } from '../components/ui/Logo';
 
-export default function Home() {
+const Home: React.FC = () => {
+  // We get the list of trips and user info from the context (the Brain)
   const { trips, currencySymbol, userProfile, notifications } = useTrips();
   const ongoingTrips = trips.filter(t => t.status === 'ongoing');
   const pendingNotifsCount = notifications.length;
@@ -27,7 +31,7 @@ export default function Home() {
             href="/friends" 
             className="p-2.5 rounded-2xl bg-neutral-100 dark:bg-neutral-900 text-neutral-600 dark:text-neutral-400 hover:text-brand-pink dark:hover:text-white transition-colors relative"
           >
-            <UserPlus size={20} />
+            <UserPlus size={120} />
           </Link>
           {/* Link to view incoming requests */}
           <Link 
@@ -43,20 +47,21 @@ export default function Home() {
           </Link>
           {/* User's profile circle - clickable to Settings */}
           <Link href="/settings" className="p-[2px] rounded-full bg-brand-gradient active:scale-95 transition-transform">
-            <div 
-                className="w-10 h-10 rounded-full border-2 border-white dark:border-black flex items-center justify-center text-white text-sm font-bold overflow-hidden"
-                style={{ backgroundColor: userProfile.avatarImage ? 'transparent' : userProfile.avatarColor }}
-            >
-                {userProfile.avatarImage ? (
-                    <img src={userProfile.avatarImage} alt="Profile" className="w-full h-full object-cover" />
-                ) : (
-                    userProfile.name.charAt(0).toUpperCase()
-                )}
-            </div>
+              <div 
+                  className="w-10 h-10 rounded-full border-2 border-white dark:border-black flex items-center justify-center text-white text-sm font-bold overflow-hidden"
+                  style={{ backgroundColor: userProfile.avatarImage ? 'transparent' : userProfile.avatarColor }}
+              >
+                  {userProfile.avatarImage ? (
+                      <img src={userProfile.avatarImage} alt="Profile" className="w-full h-full object-cover" />
+                  ) : (
+                      userProfile.name.charAt(0).toUpperCase()
+                  )}
+              </div>
           </Link>
         </div>
       </header>
 
+      {/* Show this if there are no events started yet */}
       {ongoingTrips.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12 text-center bg-neutral-50 dark:bg-neutral-900/50 rounded-3xl border border-neutral-100 dark:border-neutral-800 p-8">
           <div className="w-16 h-16 bg-white dark:bg-neutral-800 rounded-full flex items-center justify-center mb-4 shadow-sm">
@@ -72,6 +77,7 @@ export default function Home() {
           </Link>
         </div>
       ) : (
+        /* List all ongoing group events */
         <div className="space-y-4">
           <h2 className="text-xs font-bold text-neutral-500 dark:text-neutral-500 uppercase tracking-widest">Ongoing</h2>
           {ongoingTrips.map(trip => (
@@ -101,4 +107,6 @@ export default function Home() {
       )}
     </div>
   );
-}
+};
+
+export default Home;

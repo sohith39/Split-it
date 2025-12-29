@@ -1,15 +1,17 @@
+'use client';
+
 /**
  * The Notifications page shows you when someone else 
  * sends you a friend request or invites you to join an event.
  */
 import React, { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useTrips } from '../context/TripContext';
-import { Button } from '../components/ui/Button';
+import { useRouter } from 'next/navigation';
+import { useTrips } from '@/context/TripContext';
+import { Button } from '@/components/ui/Button';
 import { ArrowLeft, Bell, Check, X, UserPlus, Clock, Calendar, RefreshCw } from 'lucide-react';
 
-const Notifications: React.FC = () => {
-  const navigate = useNavigate();
+export default function Notifications() {
+  const router = useRouter();
   // Get notifications and response functions from Brain (Context)
   const { notifications, respondToNotification } = useTrips();
   const [processingId, setProcessingId] = useState<string | null>(null);
@@ -37,7 +39,7 @@ const Notifications: React.FC = () => {
   return (
     <div className="p-6 space-y-8 bg-white dark:bg-black min-h-screen">
       <header className="flex items-center gap-4">
-        <button onClick={() => navigate(-1)} className="p-2 -ml-2 text-neutral-900 dark:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900 rounded-full">
+        <button onClick={() => router.back()} className="p-2 -ml-2 text-neutral-900 dark:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900 rounded-full">
           <ArrowLeft size={24} />
         </button>
         <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">Notifications</h1>
@@ -107,6 +109,4 @@ const Notifications: React.FC = () => {
       </section>
     </div>
   );
-};
-
-export default Notifications;
+}

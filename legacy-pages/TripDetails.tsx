@@ -4,7 +4,8 @@
  * and most importantly, the "Who Owes Who" balance summary.
  */
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useTrips } from '../context/TripContext';
 import { ExpenseCategory, Expense } from '../types';
 import { Button } from '../components/ui/Button';
@@ -25,8 +26,9 @@ const CATEGORY_ICONS: Record<ExpenseCategory, React.ReactNode> = {
 };
 
 const TripDetails: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
+  const params = useParams<{ id: string }>();
+  const id = params?.id;
+  const router = useRouter();
   // [PULL POINT] Getting trip data and notifications from global context
   const { getTrip, endTrip, addExpense, updateExpense, deleteExpense, addMemberToTrip, removeMemberFromTrip, currencySymbol, userProfile, friends, inviteFriendToTrip, sentNotifications } = useTrips();
   const trip = getTrip(id || '');
@@ -217,7 +219,7 @@ const TripDetails: React.FC = () => {
   const handleEndTrip = () => {
     endTrip(trip.id);
     setIsEndModalOpen(false);
-    navigate('/history');
+    router.push('/history');
   };
 
   const handleAddMember = (e: React.FormEvent) => {
@@ -332,7 +334,7 @@ const TripDetails: React.FC = () => {
     <div className="flex flex-col h-full bg-white dark:bg-black transition-colors duration-200">
       {/* Header with Back button and End Event button */}
       <div className="shrink-0 z-20 bg-white dark:bg-black px-4 py-3 flex justify-between items-center transition-colors border-b border-neutral-100 dark:border-neutral-900">
-        <button type="button" onClick={() => navigate(-1)} className="p-2 -ml-2 text-neutral-900 dark:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900 rounded-full">
+        <button type="button" onClick={() => router.back()} className="p-2 -ml-2 text-neutral-900 dark:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900 rounded-full">
           <ArrowLeft size={24} />
         </button>
         <h1 className="font-bold text-lg text-neutral-900 dark:text-white truncate max-w-[200px]">{trip.name}</h1>

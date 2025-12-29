@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { useTrips } from '../context/TripContext';
 import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
 import { ArrowLeft, Search, UserPlus, UserMinus, User, Check, RefreshCw, X, Info } from 'lucide-react';
 
 const Friends: React.FC = () => {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { friends, searchUsers, sendFriendRequest, removeFriend, refreshFriendsAndNotifications } = useTrips();
   const [searchQuery, setSearchQuery] = useState('');
   const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -95,7 +95,7 @@ const Friends: React.FC = () => {
   return (
     <div className="p-6 space-y-8 bg-white dark:bg-black min-h-screen">
       <header className="flex items-center gap-4">
-        <button onClick={() => navigate(-1)} className="p-2 -ml-2 text-neutral-900 dark:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900 rounded-full">
+        <button onClick={() => router.back()} className="p-2 -ml-2 text-neutral-900 dark:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900 rounded-full">
           <ArrowLeft size={24} />
         </button>
         <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">Friends</h1>

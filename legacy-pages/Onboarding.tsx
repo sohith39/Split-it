@@ -1,11 +1,11 @@
 import React, { useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { useTrips } from '../context/TripContext';
 import { Button } from '../components/ui/Button';
 import { Camera } from 'lucide-react';
 
 const Onboarding: React.FC = () => {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { userProfile, updateProfile } = useTrips();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -31,7 +31,7 @@ const Onboarding: React.FC = () => {
     e.preventDefault();
     if (name) {
       updateProfile({ name, phoneNumber });
-      navigate('/');
+      router.push('/');
     }
   };
 

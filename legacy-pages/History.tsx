@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { useTrips } from '../context/TripContext';
 import { CheckCircle, Calendar } from 'lucide-react';
 
@@ -23,7 +23,7 @@ const History: React.FC = () => {
           {endedTrips.map(trip => (
             <Link 
               key={trip.id} 
-              to={`/trip/${trip.id}`}
+              href={`/trip/${trip.id}`}
               className="block bg-neutral-50 dark:bg-neutral-900 p-5 rounded-2xl border border-neutral-100 dark:border-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
             >
               <div className="flex justify-between items-start mb-2">

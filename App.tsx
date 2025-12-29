@@ -2,15 +2,15 @@ import React from 'react';
 import { HashRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { TripProvider, useTrips } from './context/TripContext';
 import Layout from './components/Layout';
-import Home from './pages/Home';
-import AddTrip from './pages/AddTrip';
-import History from './pages/History';
-import TripDetails from './pages/TripDetails';
-import Settings from './pages/Settings';
-import Login from './pages/Login';
-import Onboarding from './pages/Onboarding';
-import Friends from './pages/Friends';
-import Notifications from './pages/Notifications';
+import Home from './old-pages/Home';
+import AddTrip from './old-pages/AddTrip';
+import History from './old-pages/History';
+import TripDetails from './old-pages/TripDetails';
+import Settings from './legacy-pages/Settings';
+import Login from './old-pages/Login';
+import Onboarding from './old-pages/Onboarding';
+import Friends from './old-pages/Friends';
+import Notifications from './old-pages/Notifications';
 
 const ProtectedRoute = () => {
   const { isAuthenticated } = useTrips();

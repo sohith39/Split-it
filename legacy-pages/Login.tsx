@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { useTrips } from '../context/TripContext';
 import { Button } from '../components/ui/Button';
 import { ArrowRight, AlertCircle, RefreshCw } from 'lucide-react';
 import { SplitItLogo } from '../components/ui/Logo';
 
 const Login: React.FC = () => {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { login } = useTrips();
   const [isSignUp, setIsSignUp] = useState(false);
   const [username, setUsername] = useState('');
@@ -44,9 +44,9 @@ const Login: React.FC = () => {
     try {
       await login(username, password, isSignUp, isSignUp ? phoneNumber : undefined);
       if (isSignUp) {
-        navigate('/onboarding');
+        router.push('/onboarding');
       } else {
-        navigate('/');
+        router.push('/');
       }
     } catch (e: any) {
       setError(e.message || 'Authentication failed. Please check your connection.');

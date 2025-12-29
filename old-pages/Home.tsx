@@ -4,7 +4,7 @@
  * notifications, and profile.
  */
 import React from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { useTrips } from '../context/TripContext';
 import { ChevronRight, Calendar, Users, Bell, UserPlus } from 'lucide-react';
 import { SplitItLogo } from '../components/ui/Logo';
@@ -28,14 +28,14 @@ const Home: React.FC = () => {
         <div className="flex items-center gap-3">
           {/* Quick link to Friend Management */}
           <Link 
-            to="/friends" 
+            href="/friends" 
             className="p-2.5 rounded-2xl bg-neutral-100 dark:bg-neutral-900 text-neutral-600 dark:text-neutral-400 hover:text-brand-pink dark:hover:text-white transition-colors relative"
           >
             <UserPlus size={20} />
           </Link>
           {/* Link to view incoming requests */}
           <Link 
-            to="/notifications" 
+            href="/notifications" 
             className="p-2.5 rounded-2xl bg-neutral-100 dark:bg-neutral-900 text-neutral-600 dark:text-neutral-400 hover:text-brand-pink dark:hover:text-white transition-colors relative"
           >
             <Bell size={20} />
@@ -46,7 +46,7 @@ const Home: React.FC = () => {
             )}
           </Link>
           {/* User's profile circle - clickable to Settings */}
-          <Link to="/settings" className="p-[2px] rounded-full bg-brand-gradient active:scale-95 transition-transform">
+          <Link href="/settings" className="p-[2px] rounded-full bg-brand-gradient active:scale-95 transition-transform">
               <div 
                   className="w-10 h-10 rounded-full border-2 border-white dark:border-black flex items-center justify-center text-white text-sm font-bold overflow-hidden"
                   style={{ backgroundColor: userProfile.avatarImage ? 'transparent' : userProfile.avatarColor }}
@@ -70,7 +70,7 @@ const Home: React.FC = () => {
           <h3 className="text-lg font-bold text-neutral-900 dark:text-white">No events yet</h3>
           <p className="text-neutral-500 dark:text-neutral-400 mb-6 text-sm">Start a new event to track expenses.</p>
           <Link 
-            to="/add-trip" 
+            href="/add-trip" 
             className="text-brand-pink font-bold text-sm hover:underline"
           >
             Create your event
@@ -83,7 +83,7 @@ const Home: React.FC = () => {
           {ongoingTrips.map(trip => (
             <Link 
               key={trip.id} 
-              to={`/trip/${trip.id}`}
+              href={`/trip/${trip.id}`}
               className="block bg-white dark:bg-neutral-900 p-5 rounded-3xl shadow-lg shadow-neutral-100/50 dark:shadow-none border border-neutral-100 dark:border-neutral-800 active:scale-[0.98] transition-all"
             >
               <div className="flex justify-between items-start mb-4">

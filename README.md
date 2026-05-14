@@ -26,6 +26,15 @@ A modern expense splitting web app built to make sharing expenses with friends, 
 
 ---
 
+**Prerequisites:**  Node.js
+
+
+1. Install dependencies:
+   `npm install`
+2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
+3. Run the app:
+   `npm run dev`
+
 ## 📂 Project Structure
 
 ```bash
@@ -39,12 +48,3 @@ Split-it/
 ├── prisma/ or db/     # Database-related files (if applicable)
 ├── .env.local         # Environment variables
 └── package.json
-
-**Prerequisites:**  Node.js
-
-
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`

@@ -1,14 +1,44 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# Split It 💸
 
-# Run and deploy your AI Studio app
+A modern expense splitting web app built to make sharing expenses with friends, roommates, and groups simple and hassle-free.
 
-This contains everything you need to run your app locally.
+---
 
-View your app in AI Studio: https://ai.studio/apps/drive/1LJc3eZ-xaHREPc0ZrYHrIdfHIThexVt3
+## 🚀 Features
 
-## Run Locally
+- 👥 Create and manage groups
+- 💰 Add and split expenses easily
+- 📊 Track balances between members
+- ⚡ Fast and responsive UI
+- ☁️ Powered by Turso Database
+- 🔒 Secure environment-based configuration
+- 📱 Mobile-friendly design
+
+---
+
+## 🛠️ Tech Stack
+
+- Frontend: React / Next.js
+- Backend: Node.js
+- Database: Turso (LibSQL)
+- Styling: Tailwind CSS
+- Deployment: Vercel
+
+---
+
+## 📂 Project Structure
+
+```bash
+Split-it/
+│
+├── app/               # App routes/pages
+├── components/        # Reusable UI components
+├── lib/               # Utility functions & database setup
+├── public/            # Static assets
+├── styles/            # Global styles
+├── prisma/ or db/     # Database-related files (if applicable)
+├── .env.local         # Environment variables
+└── package.json
 
 **Prerequisites:**  Node.js
 
